@@ -123,7 +123,10 @@
 ;;这里是直接打开了ido的支持，在emacs23中这个是自带的.
 (ido-mode t)
 
-(setq ido-save-directory-list-file nil)
 ;;ido模式中不保存目录列表,解决退出Emacs时ido要询问编码的问题。
+(setq ido-save-directory-list-file nil)
+
+;; 自动保存打开文件
+(desktop-save-mode 1)
 
 (provide 'config-system)

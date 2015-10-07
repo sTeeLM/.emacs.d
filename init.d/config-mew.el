@@ -2,6 +2,8 @@
 (autoload 'mew "mew" nil t)
 (autoload 'mew-send "mew" nil t)
 
+(require 'mew-mail-sum)
+
 ;; Optional setup (Read Mail menu for Emacs 21):
 (if (boundp 'read-mail-command)
     (setq read-mail-command 'mew))
@@ -21,16 +23,21 @@
 ;; 下面的图标路径和安装路径有关，具体请看Mew的安装过程
 (setq mew-icon-directory "/opt/local/share/emacs/site-lisp/mew/etc")
 
+
 ;; 不用频繁输入密码
 (setq mew-use-cached-passwd t)
+(setq mew-passwd-timer-unit 31536000) ;1年
+(setq mew-passwd-lifetime 10) ; 10年
+(setq mew-passwd-reset-timer t)
 
 ;; 未读标记
 (setq mew-use-unread-mark t)
+;; 在所有邮箱中打开未读标记
 (setq mew-unread-mark-list '((t t)))
 
 ;; 外观
-;;(setq mew-summary-form
-;;      '(type (5 date) " " (14 from) " " t (30 subj) "|" (0 body)))
+(setq mew-summary-form
+      '(type (5 date) " " (14 from) " " t (80 subj) "|" (0 body)))
 (setq mew-sort-default-key "date")
 (setq mew-window-use-full t)
 (setq mew-underline-lines-use t)
@@ -49,20 +56,30 @@
 (setq mew-user "liwen03")
 (setq mew-mail-domain "meituan.com")                                                                
 
+(setq mew-ssl-verify-level 0)
+;(setq mew-ssl-cert-directory "")
+      
 ;; SMTP设置
 (setq mew-smtp-user "michael")                                                             
-(setq mew-smtp-server "mail.steel.hell.com")                                                           
+(setq mew-smtp-server "mail.office.mos")
+(setq mew-smtp-ssl t)
+(setq mew-smtp-ssl-port 443)
 (setq mew-smtp-auth-list '("PLAIN" "LOGIN" "CRAM-MD5"))
 
 ;; IMAP设置
+(setq mew-mailbox-type 'imap)
 (setq mew-imap-size 0)
 (setq mew-imap-delete nil) 
 (setq mew-imap-user "michael")
-(setq mew-imap-server "mail.steel.hell.com")
-(setq mew-imap-auth-list '("PLAIN" "LOGIN" "CRAM-MD5")) 
-
+(setq mew-imap-server "mail.office.mos")
+(setq mew-imap-ssl t)
+(setq mew-imap-ssl-port 8080)
+(setq mew-imap-auth nil)
+(setq mew-imap-auth-list '("CRAM-MD5"  "LOGIN"))
+(setq mew-imap-header-only nil)
 (setq mew-draft-folder "%Drafts")
 (setq mew-imap-trash-folder "%Deleted Messages")
+(setq mew-imap-trash-folder-list '("%Deleted Messages" "已删除邮件"))
 (setq mew-fcc "%Sent")
 
 
@@ -73,16 +90,33 @@
 (setq mew-use-w3m-minor-mode t)
 (setq mew-w3m-auto-insert-image t)
 
-;;mew启动时自动获取邮件
+;;mew启动时不自动获取邮件
 (setq mew-auto-get nil)
 
 ;; 设置使用Biff检查邮箱是否有新邮件，默认为5分钟。如果有新邮件，则在emacs的状态栏显示Mail(n)的提示—n表示新邮件数目。
-(setq mew-use-biff t)
+;;(setq mew-use-biff t)
 
 ;; 设置嘟嘟声通知有新邮件
-(setq mew-use-biff-bell t)
+;;(setq mew-use-biff-bell t)
 
 ;; 设置自动检查新邮件的时间间隔，单位：分钟
-(setq mew-biff-interval 5)
+;;(setq mew-biff-interval 5)
+
+
+;; 回复和签名档设置
+(setq mew-signature-file "~/.emacs.d/signature")
+(setq mew-cite-fields '("Date:"  "From:"))
+(setq mew-cite-format "On %s %s wrote:\n\n")
+(setq mew-signature-as-lastpart t)
+(setq mew-signature-insert-last t)
+(add-hook 'mew-before-cite-hook 'mew-header-goto-body)
+(add-hook 'mew-draft-mode-newdraft-hook 'mew-draft-insert-signature)
+
+;; 加密和签名
+;;(setq mew-pgp-ascii-suffix "84599A3C")
+;;(setq mew-draft-privacy-method 'smime)
+;;(setq mew-protect-privacy-always t)
+;;(setq mew-protect-privacy-always-type 'smime-signature)
+
 
 (provide 'config-mew)

@@ -64,4 +64,12 @@
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
+
+;; 插入当前日期时间
+(defun insert-current-date ()
+  "Insert the current date"
+  (interactive "*")
+  (insert (format-time-string "%Y/%m/%d %H:%M:%S" (current-time))))
+(global-set-key (kbd "C-c C-d") 'insert-current-date)
+
 (provide 'config-programing)
