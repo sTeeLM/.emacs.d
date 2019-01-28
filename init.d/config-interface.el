@@ -6,7 +6,8 @@
 (require 'color-theme)
 (eval-after-load "color-theme"
   '(progn
-     (color-theme-initialize)))
+     (color-theme-initialize)
+	(color-theme-hober)))
 
 (color-theme-gnome2)
 

@@ -20,4 +20,4 @@
 (require 'config-programing)
 
 ;;邮件设置
-(require 'config-mew)
+;;(require 'config-mew)
