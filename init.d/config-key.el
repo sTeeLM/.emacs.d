@@ -82,4 +82,12 @@
 (global-set-key (kbd "C-SPC") 'set-mark-command)
 ;;control+space键设为mark
 
+(add-hook 'term-mode-hook
+   (lambda ()
+     ;; C-x is the prefix command, rather than C-c
+     (term-set-escape-char ?\C-x)
+     (define-key term-raw-map "\M-y" 'yank-pop)
+     (define-key term-raw-map "\M-w" 'kill-ring-save)))
+;;在term模式中使用C-x而不是C-c作为escape
+
 (provide 'config-key)

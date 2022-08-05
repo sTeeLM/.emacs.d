@@ -3,13 +3,17 @@
 ;;(set-cursor-color "gold1")
 ;;(set-mouse-color "gold1")
 
-(require 'color-theme)
-(eval-after-load "color-theme"
-  '(progn
-     (color-theme-initialize)
-	(color-theme-hober)))
+;(require 'color-theme)
+;(eval-after-load "color-theme"
+;  '(progn
+;     (color-theme-initialize)
+;	(color-theme-hober)))
 
-(color-theme-gnome2)
+;(color-theme-emacs-nw)
+
+(require 'color-theme-modern)
+(load-theme 'gnome2 t t)
+(enable-theme 'gnome2)
 
 ;;(set-scroll-bar-mode nil)
 ;;取消滚动栏
