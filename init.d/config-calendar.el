@@ -1,9 +1,6 @@
-;;设置日历的一些颜色
-(setq calendar-load-hook
+;;设置日历
+(add-hook 'calendar-load-hook
 '(lambda ()
-(set-face-foreground 'diary-face "skyblue")
-(set-face-background 'holiday-face "slate blue")
-(set-face-foreground 'holiday-face "white")))
 
 ;;设置我所在地方的经纬度，calendar里有个功能是日月食的预测，和你的经纬度相联系的。
 ;; 让emacs能计算日出日落的时间，在 calendar 上用 S 即可看到
@@ -42,7 +39,8 @@
                          (holiday-fixed 9 10 "教师节")
                          (holiday-fixed 10 1 "国庆节")
                          (holiday-fixed 12 25 "圣诞节")))
-
+(message "calendar hook runed")
+))
 ;;Calendar模式支持各种方式来更改当前日期
 ;;（这里的“前”是指还没有到来的那一天，“后”是指已经过去的日子）
 ;; q 退出calendar模式

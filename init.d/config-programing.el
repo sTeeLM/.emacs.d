@@ -1,8 +1,89 @@
-;;代码折叠
+;; 编程相关的所有配置
+
+;; 将文件模式和文件后缀关联起来
+(setq auto-mode-alist
+      (append '(("\\.py\\'" . python-mode)
+                ("\\.s?html?\\'" . html-helper-mode)
+                ("\\.asp\\'" . html-helper-mode)
+                ("\\.phtml\\'" . html-helper-mode)
+                ("\\.css\\'" . css-mode)
+                ("\\.c\\'" . c-mode)
+                ("\\.h\\'" . c-mode)
+                ("\\.cpp\\'" . c++-mode))
+              auto-mode-alist))
+
+;;自动补全括号
+;;输入左边的括号，就会自动补全右边的部分.包括(), "", [] , {} , 等等。
+(defun my-mode-auto-pair ()
+  (interactive)
+  (make-local-variable 'skeleton-pair-alist)
+  (setq skeleton-pair-alist '(
+                              '((?\( _ ?\))
+				(?\[ _ ?\])
+				(?{ _ ?})
+				(?< _ ?>)
+				(?' _ ?')
+                                (?\" _ ?\"))))
+  (setq skeleton-pair t)
+  (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "'") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "[") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
+  (local-set-key (kbd "<") 'skeleton-pair-insert-maybe)
+  )
+(add-hook 'c-mode-hook 'my-mode-auto-pair)
+(add-hook 'c++-mode-hook 'my-mode-auto-pair)
+(add-hook 'java-mode-hook 'my-mode-auto-pair)
+(add-hook 'python-mode-hook 'my-mode-auto-pair)
+
+;;设置各种语言的编码风格
+(defun my-code-style ()
+            (progn
+	      (display-line-numbers-mode)
+	      (line-number-mode)
+	      (column-number-mode)
+	      (whitespace-mode)
+	      (setq c-default-style
+		    '((java-mode . "java")
+		      (awk-mode . "awk")
+		      (other . "linux")))
+              (c-set-style "linux")
+	      (setq c-basic-offset 4)
+	      (setq tab-width 4)
+              (setq backward-delete-char-untabify-method nil)))
+(add-hook 'c-mode-hook 'my-code-style)
+(add-hook 'c++-mode-hook 'my-code-style)
+(add-hook 'java-mode-hook 'my-code-style)
+(add-hook 'python-mode-hook 'my-code-style)
+
+;;设置M-g为goto-line
+(global-set-key (kbd "M-g") 'goto-line)
+
+;;M+space键设为mark
+(global-set-key (kbd "M-SPC") 'set-mark-command)
+
+;;css-mode.el编辑css文件
+(autoload 'css-mode "css-mode" "CSS editing mode" t)
+
+;;把buffer的内容连同颜色转为html格式
+(autoload 'htmlize-buffer "htmlize" "HTMLize mode" t)
+
+;; 一键格式化
+(defun indent-whole ()
+  (interactive)
+  (indent-region (point-min) (point-max))
+  (message "format successfully"))
+                                        ;绑定到F4键
+(global-set-key [f4] 'indent-whole)
+
+
+;; 代码折叠
 (load-library "hideshow")
 (add-hook 'c-mode-hook 'hs-minor-mode)
 (add-hook 'c++-mode-hook 'hs-minor-mode)
 (add-hook 'java-mode-hook 'hs-minor-mode)
+(add-hook 'python-mode-hook 'hs-minor-mode)
 (add-hook 'perl-mode-hook 'hs-minor-mode)
 (add-hook 'php-mode-hook 'hs-minor-mode)
 (add-hook 'emacs-lisp-mode-hook 'hs-minor-mode)
@@ -14,62 +95,5 @@
 ;; C-c @ C-h hide block
 ;; C-c @ C-c toggle hide/show
 
-
-;;自动补全括号
-;;输入左边的括号，就会自动补全右边的部分.包括(), "", [] , {} , 等等。
-(defun my-c-mode-auto-pair ()
-  (interactive)
-  (make-local-variable 'skeleton-pair-alist)
-  (setq skeleton-pair-alist '(
-    (?` ?` _ "''")
-    (?\( ? _ " )")
-    (?\[ ? _ " ]")
-    (?{ \n > _ \n ?} >)))
-  (setq skeleton-pair t)
-  (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
-  (local-set-key (kbd "{") 'skeleton-pair-insert-maybe)
-  (local-set-key (kbd "`") 'skeleton-pair-insert-maybe)
-  (local-set-key (kbd "[") 'skeleton-pair-insert-maybe))
-(add-hook 'c-mode-hook 'my-c-mode-auto-pair)
-(add-hook 'c++-mode-hook 'my-c-mode-auto-pair)
-
-;;把c语言风格设置为k&r风格
-(add-hook 'c-mode-hook
-'(lambda ()
-(c-set-style "k&r")))
-
-;;css-mode.el编辑css文件
-(autoload 'css-mode "css-mode" "CSS editing mode" t)
-
-;;把buffer的内容连同颜色转为html格式
-(autoload 'htmlize-buffer "htmlize" "HTMLize mode" t)
-
-;;folding.el 编辑文本的一部分，其它部分折叠起来
-(autoload 'folding-mode "folding" "Folding mode" t)
-(autoload 'turn-off-folding-mode "folding" "Folding mode" t)
-(autoload 'turn-on-folding-mode "folding" "Folding mode" t)
-
-(setq auto-mode-alist
-      ;; 将文件模式和文件后缀关联起来
-      (append '(("\\.py\\'" . python-mode)
-                ("\\.s?html?\\'" . html-helper-mode)
-                ("\\.asp\\'" . html-helper-mode)
-                ("\\.phtml\\'" . html-helper-mode)
-                ("\\.css\\'" . css-mode))
-              auto-mode-alist))
-
-;; 添加md模式
-(autoload 'markdown-mode "markdown-mode"
-  "Major mode for editing Markdown files" t)
-(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-
-
-;; 插入当前日期时间
-(defun insert-current-date ()
-  "Insert the current date"
-  (interactive "*")
-  (insert (format-time-string "%Y/%m/%d %H:%M:%S" (current-time))))
-(global-set-key (kbd "C-c C-d") 'insert-current-date)
 
 (provide 'config-programing)

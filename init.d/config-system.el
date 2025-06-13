@@ -16,17 +16,16 @@
 ;;设置粘贴缓冲条目数量.用一个很大的kill ring(最多的记录个数). 这样防止我不小心删掉重要的东西
 (setq kill-ring-max 2000)
 
-
- ; Autofill in all modes;;
+;; Autofill in all modes;;
 (setq-default auto-fill-function 'do-auto-fill)
 
 ;;把 fill-column 设为 60. 这样的文字更好读
 (setq default-fill-column 120)
 
+;;不用 TAB 字符来indent, 这会引起很多奇怪的错误。编辑 Makefile 的时候也不用担心，因为 makefile-mode 会把 TAB 键设置成真正的 TAB 字符，并且加亮显示的。
 (setq-default indent-tabs-mode nil)
 (setq default-tab-width 8);;tab键为8个字符宽度
 (setq tab-stop-list ())
-;;不用 TAB 字符来indent, 这会引起很多奇怪的错误。编辑 Makefile 的时候也不用担心，因为 makefile-mode 会把 TAB 键设置成真正的 TAB 字符，并且加亮显示的。
 
 ;;设置 sentence-end 可以识别中文标点。不用在 fill 时在句号后插入两个空格。
 (setq sentence-end "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
@@ -78,7 +77,7 @@
 ;; (setq backup-by-copying t);;备份设置方法，直接拷贝
 
 ;;自动保存模式
-;;(setq auto-save-mode nil)
+(setq auto-save-mode nil)
 
 ;; 不生成临时文件
 (setq-default make-backup-files nil)
@@ -100,8 +99,8 @@
 
 
 ;;设置有用的个人信息,这在很多地方有用。
-(setq user-full-name "liwen03")
-(setq user-mail-address "liwen03@meituan.com")
+(setq user-full-name "steelm")
+(setq user-mail-address "steelm@madcat.cc")
 
 ;; 自动的在文件末增加一新行
 (setq require-final-newline nil)
@@ -117,7 +116,7 @@
 
 
 ;;Emacs 21 中已经是缺省设置。按 C-n 或向下键时不添加新行。
-;;(setq next-line-add-newlines nil)
+(setq next-line-add-newlines nil)
 
 ;;ido的配置,这个可以使你在用C-x C-f打开文件的时候在后面有提示;
 ;;这里是直接打开了ido的支持，在emacs23中这个是自带的.
@@ -127,6 +126,6 @@
 (setq ido-save-directory-list-file nil)
 
 ;; 自动保存打开文件
-(desktop-save-mode 1)
+(desktop-save-mode 0)
 
 (provide 'config-system)

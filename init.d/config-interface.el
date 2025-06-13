@@ -1,19 +1,5 @@
-;;(set-foreground-color "grey")
-;;(set-background-color "black")
-;;(set-cursor-color "gold1")
-;;(set-mouse-color "gold1")
-
-;(require 'color-theme)
-;(eval-after-load "color-theme"
-;  '(progn
-;     (color-theme-initialize)
-;	(color-theme-hober)))
-
-;(color-theme-emacs-nw)
-
-(require 'color-theme-modern)
-(load-theme 'gnome2 t t)
-(enable-theme 'gnome2)
+;; 界面配置
+(load-theme 'tango-dark t)
 
 ;;(set-scroll-bar-mode nil)
 ;;取消滚动栏
@@ -25,32 +11,32 @@
 ;;取消工具栏
 
 ;;启动设置
-(setq default-frame-alist
-             '((vertical-scroll-bars)
-               (top . 25)
-               (left . 45)
-               (width . 120)
-               (height . 40)
-               (background-color . "black")
-               (foreground-color . "grey")
-               (cursor-color . "gold1")
-               (mouse-color . "gold1")
-               (tool-bar-lines . 0)
-               (menu-bar-lines . 1)
-               (right-fringe)
-               (left-fringe)))
+;(setq default-frame-alist
+;            '((vertical-scroll-bars)
+;              (top . 25)
+;               (left . 45)
+;               (width . 120)
+;               (height . 40)
+;               (background-color . "black")
+;               (foreground-color . "grey")
+;               (cursor-color . "gold1")
+;               (mouse-color . "gold1")
+;               (tool-bar-lines . 0)
+;               (menu-bar-lines . 1)
+;               (right-fringe)
+;               (left-fringe)))
 
 ;;启动自动最大化(数据自己调整，注意格式，如(top . 0)，圆点前后都要留有空格)
-;;(setq initial-frame-alist '((top . 0) (left . 0) (width . 142) (height . 49)))
+(setq initial-frame-alist '((top . 0) (left . 0) (width . 142) (height . 49)))
 
 
 ;; 设置另外一些颜色：语法高亮显示的背景和主题，区域选择的背景和主题，二次选择的背景和选择
-(set-face-foreground 'highlight "white")
-(set-face-background 'highlight "blue")
-(set-face-foreground 'region "cyan")
-(set-face-background 'region "blue")
-(set-face-foreground 'secondary-selection "skyblue")
-(set-face-background 'secondary-selection "darkblue")
+;(set-face-foreground 'highlight "white")
+;(set-face-background 'highlight "blue")
+;(set-face-foreground 'region "cyan")
+;(set-face-background 'region "blue")
+;(set-face-foreground 'secondary-selection "skyblue")
+;(set-face-background 'secondary-selection "darkblue")
 
 (display-time-mode 1);;启用时间显示设置，在minibuffer上面的那个杠上
 (setq display-time-24hr-format t);;时间使用24小时制
@@ -74,12 +60,11 @@
 ;; 不要在term或者shell中显示行号
 (defun my_term_mode_hook ()
     (linum-mode 0)
-    (message "%s" "Line number disabled.")
-    )
+    (message "%s" "Line number disabled."))
+
 (defun my_shell_mode_hook ()
     (linum-mode 0)
-    (message "%s" "Line number disabled.")
-    )
+    (message "%s" "Line number disabled."))
 
 (add-hook 'term-mode-hook 'my_term_mode_hook)
 (add-hook 'shell-mode-hook 'my_shell_mode_hook)
