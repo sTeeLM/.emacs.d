@@ -3,13 +3,11 @@
 ;; 将文件模式和文件后缀关联起来
 (setq auto-mode-alist
       (append '(("\\.py\\'" . python-mode)
-                ("\\.s?html?\\'" . html-helper-mode)
-                ("\\.asp\\'" . html-helper-mode)
-                ("\\.phtml\\'" . html-helper-mode)
                 ("\\.css\\'" . css-mode)
                 ("\\.c\\'" . c-mode)
                 ("\\.h\\'" . c-mode)
-                ("\\.cpp\\'" . c++-mode))
+                ("\\.cpp\\'" . c++-mode)
+                ("\\.el\\'" . emacs-lisp-mode))
               auto-mode-alist))
 
 ;;自动补全括号
@@ -17,6 +15,7 @@
 (defun my-mode-auto-pair ()
   (interactive)
   (make-local-variable 'skeleton-pair-alist)
+  (message "my-mode-auto-pair run")  
   (setq skeleton-pair-alist '(
                               '((?\( _ ?\))
 				(?\[ _ ?\])
@@ -36,26 +35,45 @@
 (add-hook 'c++-mode-hook 'my-mode-auto-pair)
 (add-hook 'java-mode-hook 'my-mode-auto-pair)
 (add-hook 'python-mode-hook 'my-mode-auto-pair)
+(add-hook 'emacs-lisp-mode-hook 'my-mode-auto-pair)
 
 ;;设置各种语言的编码风格
 (defun my-code-style ()
-            (progn
-	      (display-line-numbers-mode)
-	      (line-number-mode)
-	      (column-number-mode)
-	      (whitespace-mode)
-	      (setq c-default-style
-		    '((java-mode . "java")
-		      (awk-mode . "awk")
-		      (other . "linux")))
-              (c-set-style "linux")
-	      (setq c-basic-offset 4)
-	      (setq tab-width 4)
-              (setq backward-delete-char-untabify-method nil)))
+  (message "my-code-style run")
+  (progn
+    (display-line-numbers-mode)
+    (line-number-mode)
+    (column-number-mode)
+    (whitespace-mode -1)
+    (setq c-default-style
+	  '((java-mode . "java")
+	    (awk-mode . "awk")
+	    (other . "linux")))
+    (c-set-style "linux")
+    (setq c-basic-offset 4)
+    (setq tab-width 4)
+    (indent-tabs-mode -1)
+    (auto-fill-mode -1)
+    (setq backward-delete-char-untabify-method nil)))
 (add-hook 'c-mode-hook 'my-code-style)
 (add-hook 'c++-mode-hook 'my-code-style)
 (add-hook 'java-mode-hook 'my-code-style)
 (add-hook 'python-mode-hook 'my-code-style)
+
+(defun my-elisp-code-style ()
+  (message "my-code-style run")
+  (progn
+    (display-line-numbers-mode)
+    (line-number-mode)
+    (column-number-mode)
+    (whitespace-mode -1)
+    (setq c-basic-offset 4)
+    (setq tab-width 4)
+    (indent-tabs-mode -1)
+    (auto-fill-mode -1)
+    (setq backward-delete-char-untabify-method nil)))
+(add-hook 'emacs-lisp-mode-hook 'my-elisp-code-style)
+
 
 ;;设置M-g为goto-line
 (global-set-key (kbd "M-g") 'goto-line)

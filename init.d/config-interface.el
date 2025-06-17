@@ -1,6 +1,6 @@
 ;; 界面配置
-(load-theme 'tango-dark t)
-
+;(load-theme 'tango-dark t)
+(load-theme 'blue-mood t)
 ;;(set-scroll-bar-mode nil)
 ;;取消滚动栏
 
@@ -51,23 +51,8 @@
 (setq font-lock-maximum-size '((t . 1048576) (vm-mode . 5250000)))
 ;; 语法高亮。除 shell-mode 和 text-mode 之外的模式中使用语法高亮。
 
-(setq column-number-mode t)
-(setq line-number-mode t)
-(setq linum-format "%d ")
 ;;显示行列号
 (setq mouse-yank-at-point nil)
-
-;; 不要在term或者shell中显示行号
-(defun my_term_mode_hook ()
-    (linum-mode 0)
-    (message "%s" "Line number disabled."))
-
-(defun my_shell_mode_hook ()
-    (linum-mode 0)
-    (message "%s" "Line number disabled."))
-
-(add-hook 'term-mode-hook 'my_term_mode_hook)
-(add-hook 'shell-mode-hook 'my_shell_mode_hook)
 
 ;;光标靠近鼠标指针时，让鼠标指针自动让开，别挡住视线。
 (mouse-avoidance-mode 'animate)
