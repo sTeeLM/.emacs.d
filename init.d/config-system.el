@@ -39,7 +39,11 @@
 
 ;;设置缺省主模式是text，,并进入auto-fill次模式.而不是基本模式fundamental-mode
 (setq default-major-mode 'text-mode)
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
+;;(add-hook 'text-mode-hook 'turn-on-auto-fill)
+
+;; 使用xclip-mode，打通系统剪切版
+(require 'xclip)
+(add-hook 'text-mode-hook 'xclip-mode)
 
 ;;打开括号匹配显示模式
 (show-paren-mode t)
@@ -112,7 +116,7 @@
 (setq track-eol t)
 
 ;; 当浏览 man page 时，直接跳转到 man buffer。
-(setq Man-notify-method 'pushy)
+(setq man-notify-method 'pushy)
 
 
 ;;Emacs 21 中已经是缺省设置。按 C-n 或向下键时不添加新行。
@@ -120,12 +124,13 @@
 
 ;;ido的配置,这个可以使你在用C-x C-f打开文件的时候在后面有提示;
 ;;这里是直接打开了ido的支持，在emacs23中这个是自带的.
+(require 'ido)
 (ido-mode t)
 
 ;;ido模式中不保存目录列表,解决退出Emacs时ido要询问编码的问题。
 (setq ido-save-directory-list-file nil)
 
-;; 自动保存打开文件
+;; 不自动保存打开文件
 (desktop-save-mode 0)
 
 (provide 'config-system)

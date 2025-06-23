@@ -9,6 +9,6 @@
 (global-set-key (kbd "C-c l") 'dictionary-lookup-definition)
 
 ;; 默认查找中文词典
-(setq dictionary-default-dictionary "pydict")
+(setq dictionary-default-dictionary "*")
 
 (provide 'config-dictionary) 

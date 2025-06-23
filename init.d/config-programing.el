@@ -1,3 +1,4 @@
+
 ;; 编程相关的所有配置
 
 ;; 将文件模式和文件后缀关联起来
@@ -54,6 +55,7 @@
     (setq tab-width 4)
     (indent-tabs-mode -1)
     (auto-fill-mode -1)
+    (xclip-mode 1)
     (setq backward-delete-char-untabify-method nil)))
 (add-hook 'c-mode-hook 'my-code-style)
 (add-hook 'c++-mode-hook 'my-code-style)
@@ -71,6 +73,7 @@
     (setq tab-width 4)
     (indent-tabs-mode -1)
     (auto-fill-mode -1)
+    (xclip-mode 1)
     (setq backward-delete-char-untabify-method nil)))
 (add-hook 'emacs-lisp-mode-hook 'my-elisp-code-style)
 

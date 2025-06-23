@@ -21,7 +21,7 @@
       'mew-send-hook))
 
 ;; 下面的图标路径和安装路径有关，具体请看Mew的安装过程
-(setq mew-icon-directory "/opt/local/share/emacs/site-lisp/mew/etc")
+(setq mew-icon-directory "~/.emacs.d/elpa/mew-20240911.749/etc")
 
 
 ;; 不用频繁输入密码
@@ -37,7 +37,8 @@
 
 ;; 外观
 (setq mew-summary-form
-      '(type (5 date) " " (14 from) " " t (80 subj) "|" (0 body)))
+      '(type (5 year) (5 date) "|" (80 from) "|" t (0 subj)))
+
 (setq mew-sort-default-key "date")
 (setq mew-window-use-full t)
 (setq mew-underline-lines-use t)

@@ -1,6 +1,7 @@
 ;; 界面配置
 ;(load-theme 'tango-dark t)
 (load-theme 'blue-mood t)
+
 ;;(set-scroll-bar-mode nil)
 ;;取消滚动栏
 
@@ -31,19 +32,21 @@
 
 
 ;; 设置另外一些颜色：语法高亮显示的背景和主题，区域选择的背景和主题，二次选择的背景和选择
-;(set-face-foreground 'highlight "white")
-;(set-face-background 'highlight "blue")
-;(set-face-foreground 'region "cyan")
-;(set-face-background 'region "blue")
-;(set-face-foreground 'secondary-selection "skyblue")
-;(set-face-background 'secondary-selection "darkblue")
+(set-face-foreground 'highlight "white")
+(set-face-background 'highlight "blue")
+(set-face-foreground 'region "cyan")
+(set-face-background 'region "blue")
+(set-face-foreground 'secondary-selection "skyblue")
+(set-face-background 'secondary-selection "darkblue")
 
 (display-time-mode 1);;启用时间显示设置，在minibuffer上面的那个杠上
 (setq display-time-24hr-format t);;时间使用24小时制
 (setq display-time-day-and-date t);;时间显示包括日期和具体时间
 (setq display-time-use-mail-icon t);;时间栏旁边启用邮件设置
-(setq display-time-interval 10);;时间的变化频率，单位多少来着？
+(setq display-time-interval 10);;时间的变化频率，单位是秒？
 
+;;显示格式CST 2025/06/22 星期日 20:26:40
+(setq display-time-format "%Z %Y/%m/%d %A %H:%M")
 
 (setq font-lock-maximum-decoration t)
 (setq font-lock-global-modes '(not shell-mode text-mode))
@@ -62,5 +65,13 @@
 
 ;;进行语法加亮。
 (setq global-font-lock-mode t)
+
+;;修改scratch窗口消息
+(setq initial-scratch-message
+";; This buffer is for text that is not saved, and for Lisp evaluation. \n\
+;; To create a file, visit it with `\\[find-file]' and enter text in its buffer.\n\
+;; 使用`\\[mew]'打开邮件，使用`\\[Cal]'打开日历\n\
+;; 祝你有一个好心情！\n\
+")
 
 (provide 'config-interface)

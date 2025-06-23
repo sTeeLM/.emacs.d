@@ -6,43 +6,58 @@
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
-;; 插入图片到文件中，该文件将被copy到assets目录
-(defun markdown-insert-inline-image-from-file (image)
-  "copy file to 'assets', nsert it as inline image"
-  (interactive "FInsert image file: ")
+
+(defun markdown-insert-inline-item-from-file (item is-image)
+  "copy file to 'assets', insert it as inline image or link"
   (let
       (
-       (image-file-path) ; src image file abs path
+       (item-file-path) ; src file abs path
        (assets-path)  ; assets directory abs path
-       (assets-image-path) ; assets image file abs path (dest)
-       (assets-image-url)) ; assets image url
+       (assets-item-path) ; assets item file abs path (dest)
+       (assets-item-url)) ; assets item url
       (condition-case err
           (progn
-            (setq image-file-path (expand-file-name image))
+            (setq item-file-path (expand-file-name item))
             (setq assets-path (file-name-concat (file-name-directory (buffer-file-name)) "assets"))
-            (setq assets-image-path (file-name-concat assets-path (file-name-nondirectory image)))
-            (setq assets-image-url (file-name-concat "assets" (file-name-nondirectory image)))
-;            (message "image-file-path is %s" image-file-path)
-;            (message "assets-path is %s" assets-path)
-;            (message "assets-image-path is %s" assets-image-path)
-;            (message "assets-image-url is %s" (url-encode-url assets-image-url))
+            (setq assets-item-path (file-name-concat assets-path (file-name-nondirectory item)))
+            (setq assets-item-url (file-name-concat "assets" (file-name-nondirectory item)))
+;            (edebug-trace "item-file-path is %s" item-file-path)
+;            (edebug-trace "assets-path is %s" assets-path)
+;            (edebug-trace "assets-item-path is %s" assets-item-path)
+;            (edebug-trace "assets-item-url is %s" (url-encode-url assets-item-url))
             (unless (file-exists-p assets-path)
               (make-directory assets-path))
             (copy-file
-             image-file-path
-             assets-image-path 0) ; if exist, prompt overwirte?
-            (markdown-insert-inline-image
-             (file-name-nondirectory image)
-             (url-encode-url assets-image-url)
-             (file-name-nondirectory image))
-            )
+             item-file-path
+             assets-item-path 0) ; if exist, prompt overwirte?
+            (if is-image
+                (markdown-insert-inline-image
+                 (file-name-nondirectory item)
+                 (url-encode-url assets-item-url)
+                 (file-name-nondirectory item))
+              (markdown-insert-inline-link
+               (file-name-nondirectory item)
+               (url-encode-url assets-item-url)
+               (file-name-nondirectory item))))
         (file-already-exists
          (message "Destination file already exists." err))
         (file-missing
          (message "File missing %s" err))
         )
-      )
+      )  
   )
+
+;; 插入图片到文件中，该文件将被copy到assets目录
+(defun markdown-insert-inline-image-from-file (image)
+  "copy file to 'assets', insert it as inline image"
+  (interactive "fInsert image file: ")
+  (markdown-insert-inline-item-from-file image t))
+
+;; 插入图片到文件中，该文件将被copy到assets目录
+(defun markdown-insert-inline-link-from-file (image)
+  "copy file to 'assets', insert it as inline link"
+  (interactive "fInsert file: ")
+  (markdown-insert-inline-item-from-file image nil))
 
 
 ;; 插入当前日期时间，例如：Wed, 31 Aug 2022 11:58:05 +0800
@@ -54,14 +69,16 @@
 (defun my-md-hook ()
   (message "run my-md-hook")
   (markdown-live-preview-mode)
+;  (markdown-view-mode)
   (auto-fill-mode -1)
   (local-set-key (kbd "C-c C-d") 'insert-current-date)
-  (local-set-key (kbd "C-c i") 'markdown-insert-inline-image-from-file))
+  (local-set-key (kbd "C-c i") 'markdown-insert-inline-image-from-file)
+  (local-set-key (kbd "C-c f") 'markdown-insert-inline-link-from-file))
 
 (add-hook 'markdown-mode-hook 'my-md-hook)
 
 ;; Markdown可以预览
-(custom-set-variables
- '(markdown-command "pandoc"))
+;(custom-set-variables
+(setq markdown-command "pandoc -s -c /Users/michael/.emacs.d/pandoc/pandoc.css --metadata title=preview")
 
 (provide 'config-markdown)

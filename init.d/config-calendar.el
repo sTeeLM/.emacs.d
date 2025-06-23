@@ -1,21 +1,28 @@
 ;;设置日历
-
+(require 'calfw)
+(require 'calfw-cal)
 (require 'calendar)
+(require 'icalendar)
 
-(defconst my-diary-root "/Volumes/Diary" "root directory or diary archive")
 
-(defconst my-diary-skel-string
-"## <font color=green>天气：晴</font>\n\
-\n\
-## <font color=green>%04d.%02d.%02d %s</font>\n\
-\n\
+;; 在calendar上，按下d，直接显示markdown版本的日记
+
+(defcustom my-diary-root "/Volumes/Diary" "root directory or diary archive")
+(defcustom my-diary-skel-string
+"<div class=\"weather\">天气：晴</div>\n\
+<div class=\"date\">%04d.%02d.%02d %s</div>\n\
 ------------------------------------------------\n\
 \n\
-## 大事记 ##\n")
+## 大事记 ##\n" "skel content in newly created diary")
+
+(define-error 'prepare-archive-error "can not prepare diary archive")
 
 (defun my-diary-create-empty-diary (file year mon day)
   (message "my-diary-create-empty-diary %s" file)
-  (switch-to-buffer (find-file file))
+  (let ((display-buffer-overriding-action
+         '(display-buffer-pop-up-window)))
+    (display-buffer (find-file file)))
+  ;(switch-to-buffer-other-window (find-file file))
   (insert (format my-diary-skel-string
                   year mon day (calendar-day-name current-date nil)))
   (save-buffer))
@@ -25,7 +32,7 @@
   (unless (file-accessible-directory-p my-diary-root)
     (let ((my-diary-pass))
       (setq my-diary-pass (read-passwd "Enter diary archive pass:"))
-      (call-process "/usr/bin/open" nil "*Messages*" nil "-g" (format "smb://michael:%s@share/Diary" my-diary-pass))))
+      (call-process "/usr/bin/open" nil "*Cal-Messages*" nil "-g" (format "smb://michael:%s@share/Diary" my-diary-pass))))
   (let ((cnt 0) (ready nil))
     (while (and ( < cnt 10) (not ready))
       (progn
@@ -35,7 +42,7 @@
         (message "wait for %s ready %d" my-diary-root cnt)
         (setq cnt (+ cnt 1))))
     (if (>= cnt 10)
-        (signal 'can-not-prepare-archive' t))))
+        (signal 'prepare-archive-error t))))
 
 
 (defun my-diary-open-diary-file (current-date)
@@ -53,7 +60,10 @@
       (unless (file-accessible-directory-p diary-dir)
         (make-directory diary-dir t))
       (if (file-exists-p diary-file)
-          (switch-to-buffer (find-file diary-file))
+          (let ((display-buffer-overriding-action
+                 '(display-buffer-pop-up-window)))
+            (display-buffer (find-file diary-file)))
+          ;(switch-to-buffer-other-window (find-file diary-file))
         (my-diary-create-empty-diary diary-file (nth 2 current-date) (nth 0 current-date) (nth 1 current-date)))))
 
 (defun my-diary-view-entries (&optional arg)
@@ -66,10 +76,9 @@
           (my-diary-open-diary-file current-date))
       (file-error
        (message "file error! %s" err))
-      (can-not-prepare-archive
+      (prepare-archive-error
        (message "prepare archive failed! %s" err)))))
 
-(defun my-calendar-hook ()
 
 ;;设置我所在地方的经纬度，calendar里有个功能是日月食的预测，和你的经纬度相联系的。
 ;; 让emacs能计算日出日落的时间，在 calendar 上用 S 即可看到
@@ -115,12 +124,116 @@
                          (holiday-fixed 9 10 "教师节")
                          (holiday-fixed 10 1 "国庆节")
                          (holiday-fixed 12 25 "圣诞节")))
-(calendar-mark-holidays)
-(local-set-key (kbd "d") 'my-diary-view-entries)
 
-(message "my-calendar-hook hook run"))
+(setq calendar-holidays holiday-general-holidays)
+
+
+(defun my-calendar-hook()
+  (calendar-mark-holidays)
+  (local-set-key (kbd "d") 'my-diary-view-entries)
+  (message "my-calendar-hook hook run"))
 
 (add-hook 'calendar-mode-hook 'my-calendar-hook)
+
+
+;; 为calfw添加一个外挂，原有的calfw-ical不能支持循环日历
+;; 所以，我们添加一部分代码，使用calfw-cal数据源，在此基础
+;; 上，将ics文件转化为diary文件，让calfw-cal支持多数据源
+;; 非常丑陋的改写。。
+
+(defcustom cfw:cal-ical-url-cache-base "~/.emacs.d/caldav-cache" "base dir of cache files")
+(defcustom cfw:cal-warn-prefix "CAL" "prefix of logging")
+(define-error 'cfw:download-error "URL download failed")
+
+(defun cfw:cal-test-ics-cache (dfile ics)
+  (not (and (file-readable-p dfile) (file-readable-p ics)  (file-newer-than-file-p dfile ics))))
+
+
+(defun cfw:cal-download-url (url auth-user ics)
+  (let ((passwd) (ret 0))
+    (if auth-user
+        (when (setq passwd (read-passwd (format "Please input password for %s@%s:" auth-user ics)))
+          (setq ret (call-process "curl" nil "*Cal-Messages*" nil url "-u" (format "%s:%s" auth-user passwd) "-o" (expand-file-name ics))))
+      (setq ret (call-process "curl" nil "*Cal-Messages*" nil url "-o" (expand-file-name ics))))
+    (message "curl ret %d" ret)
+    (unless (equal ret 0)
+      (signal 'cfw:download-error ret))
+    ))
+  
+
+(defun cfw:cal-translate-ics (ics dfile)
+  (save-current-buffer
+      ;; now load and convert from the ical file
+      (let ((buffer))
+        (delete-file dfile)
+        ; create empty diary file
+        (save-buffer (find-file dfile))
+        (set-buffer (find-file ics))
+        (icalendar-import-buffer dfile t nil)
+        (setq buffer (get-file-buffer ics))
+        (when buffer (kill-buffer buffer))
+        (setq buffer (get-file-buffer dfile))
+        (when (kill-buffer buffer))
+      )))
+
+(defun cfw:cal-to-calendar (name url auth-user begin end)
+  (let ((diary-file (file-name-concat cfw:cal-ical-url-cache-base (format "%s.%s" name "diary")))
+        (ics-file (file-name-concat cfw:cal-ical-url-cache-base (format "%s.%s" name "ics"))))
+    ;; if diary-file not exist, or older than ics, or ics not exist, read from url
+    (when (cfw:cal-test-ics-cache diary-file ics-file)
+      (condition-case err
+          (progn
+            (cfw:cal-download-url url auth-user ics-file)
+            (cfw:cal-translate-ics ics-file diary-file))
+        (file-error
+         (message "file error %s" err))
+        (cfw:download-error
+         (message "url download error %s" (cdr err)))))
+      (if (file-readable-p diary-file)
+          (cfw:cal-schedule-period-to-calendar begin end)
+        (display-warning cfw:cal-warn-prefix (format "diary file %s not exist or readable" diary-file)))))
+
+(defun cfw:cal-create-source-from-ical-url (name url &optional color auth-user)
+  "Create diary calendar source."
+ (lexical-let ((url url) (name name) (auth-user auth-user))
+  (make-cfw:source
+   :name (concat "Cal:" name)
+   :color (or color "SaddleBrown")
+   :data (lambda (begin end)
+           (cfw:cal-to-calendar name url auth-user begin end))
+   )))
+          
+
+(defun cfw:cal-view-diary ()
+  "Show dairy on the selected date."
+  (interactive)
+  (let* ((cursor-date (cfw:cursor-to-nearest-date)))
+    (message "current date is %s" cursor-date)
+    (my-diary-open-diary-file cursor-date)))
+
+(defun cfw:cal-clear-cache-refresh () 
+  "Clear cache and refresh all dairy source."
+  (interactive)
+  (message "will clear all cache")
+  (call-process-shell-command (format "rm -rf %s/*" cfw:cal-ical-url-cache-base) nil "*Cal-Messages*")
+  (cfw:refresh-calendar-buffer nil))
+  
+(keymap-set cfw:calendar-mode-map "d" 'cfw:cal-view-diary)
+(keymap-set cfw:calendar-mode-map "R" 'cfw:cal-clear-cache-refresh)
+
+(defun Cal ()
+  (interactive)
+  (cfw:open-calendar-buffer
+   :contents-sources
+   (list
+    (cfw:cal-create-source-from-ical-url "纪念日" "https://ical.madcat.cc/calanders/michael/89098fa4-ef29-7b1e-3cbd-09bc0ec16477/" "#ff0000" "michael")
+    (cfw:cal-create-source-from-ical-url "旅行" "https://ical.madcat.cc/calanders/michael/4334dbe0-e104-cd7c-520c-9611ebff2e6e/" "#7D18F9" "michael")
+    (cfw:cal-create-source-from-ical-url "娃校内" "https://ical.madcat.cc/calanders/michael/ab40a81c-48a6-3b5d-c5b2-b2f0653fea35/" "#2DEFF8" "michael")
+    (cfw:cal-create-source-from-ical-url "娃校外" "https://ical.madcat.cc/calanders/michael/a47a0a99-a761-3126-e96b-f159ded1cf48/" "#7286DC" "michael")
+    (cfw:cal-create-source-from-ical-url "学习计划" "https://ical.madcat.cc/calanders/michael/7ceac6da-9d09-4f33-fbe4-9a0332ae8e13/" "#03D74C" "michael")
+    (cfw:cal-create-source-from-ical-url "运动" "https://ical.madcat.cc/calanders/michael/cbf482ec-b369-cdde-f982-ea984f45e49a/" "#FECC00" "michael")
+    (cfw:cal-create-source-from-ical-url "其他" "https://ical.madcat.cc/calanders/michael/044b81cb-7f8d-15b7-9127-48ef1353150b/" "#D07669" "michael")
+    )))
 
 ;;Calendar模式支持各种方式来更改当前日期
 ;;（这里的“前”是指还没有到来的那一天，“后”是指已经过去的日子）
