@@ -152,13 +152,12 @@
 (defun cfw:cal-download-url (url auth-user ics)
   (let ((passwd) (ret 0))
     (if auth-user
-        (when (setq passwd (read-passwd (format "Please input password for %s@%s:" auth-user ics)))
+        (when (setq passwd (read-passwd (format "Please input password for %s@%s: " auth-user ics)))
           (setq ret (call-process "curl" nil "*Cal-Messages*" nil url "-u" (format "%s:%s" auth-user passwd) "-o" (expand-file-name ics))))
       (setq ret (call-process "curl" nil "*Cal-Messages*" nil url "-o" (expand-file-name ics))))
     (message "curl ret %d" ret)
     (unless (equal ret 0)
-      (signal 'cfw:download-error ret))
-    ))
+      (signal 'cfw:download-error ret))))
   
 
 (defun cfw:cal-translate-ics (ics dfile)
@@ -197,7 +196,7 @@
   "Create diary calendar source."
  (lexical-let ((url url) (name name) (auth-user auth-user))
   (make-cfw:source
-   :name (concat "Cal:" name)
+   :name (concat name)
    :color (or color "SaddleBrown")
    :data (lambda (begin end)
            (cfw:cal-to-calendar name url auth-user begin end))
@@ -213,9 +212,17 @@
 
 (defun cfw:cal-clear-cache-refresh () 
   "Clear cache and refresh all dairy source."
-  (interactive)
-  (message "will clear all cache")
-  (call-process-shell-command (format "rm -rf %s/*" cfw:cal-ical-url-cache-base) nil "*Cal-Messages*")
+  (interactive )
+  (let ((cp (cfw:cp-get-component)) (choice-list '(("all" 0))) (index 0) (name))
+    (cl-loop for s in (cfw:cp-get-contents-sources cp)
+          for f = (cfw:source-name s)
+          if f do (push (list f index) choice-list))
+    (setq name (completing-read "Select Cal to refresh: "
+                                choice-list nil t "all"))
+    (when (or (equal name "all") (equal name ""))
+      (setq name "*"))
+    (message "will clear caches %s" name)
+    (call-process-shell-command (format "rm -rf %s/%s.*" cfw:cal-ical-url-cache-base name) nil "*Cal-Messages*"))
   (cfw:refresh-calendar-buffer nil))
   
 (keymap-set cfw:calendar-mode-map "d" 'cfw:cal-view-diary)
@@ -235,6 +242,7 @@
     (cfw:cal-create-source-from-ical-url "其他" "https://ical.madcat.cc/calanders/michael/044b81cb-7f8d-15b7-9127-48ef1353150b/" "#D07669" "michael")
     )))
 
+  
 ;;Calendar模式支持各种方式来更改当前日期
 ;;（这里的“前”是指还没有到来的那一天，“后”是指已经过去的日子）
 ;; q 退出calendar模式
