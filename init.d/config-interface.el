@@ -74,4 +74,49 @@
 ;; 祝你有一个好心情！\n\
 ")
 
+;; 添加ibuffer作为buffer list的替代
+(require 'ibuffer)
+(require 'ibuf-ext)
+
+; 原来展示buffer list，现在展示ibuffer
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
+
+(string-match ".*/Diary/[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]/index.md" "/Volumes/Diary/2004/04/06/index.md")
+; 分组的定义
+(setq ibuffer-saved-filter-groups
+ '(("MyList"
+    ("Dired"    (mode          . dired-mode))    ; Filter by mode
+    ("Mail"     (or                                  ; Or multiple!
+	            (mode . mew-summary-mode)
+	            (mode . mew-message-mode)))
+    ("Term"     (or                                  ; Or multiple!
+	            (mode . vterm-mode)
+	            (mode . term-mode)
+                (mode . shell-mode)))
+    ("Calendar" (or                                  ; Or multiple!
+	            (mode . calendar-mode)
+	            (mode . cfw:calendar-mode)
+                (mode . cfw:details-mode)))
+    ("Diary"    (or
+                 (and
+                  (filename . ".*/Diary/[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]/index.md")
+                  (mode . markdown-mode))
+                 (and
+                  (filename . ".*/Diary/[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]/index.html")
+                  (mode . eww-mode))))
+    ("Stars"    (starred-name))                  ; Group *starred*
+    ("Unsaved"  (modified))                      ; All unsaved buffers
+    )))
+
+; 默认不展示空分组
+(setq ibuffer-show-empty-filter-groups nil)
+
+;; Tell ibuffer to load the group automatically
+(defun my-ibuffer-hook ()
+  (setq ibuffer-hidden-filter-groups nil) ;初始化的时候，所有分组都展开
+  (ibuffer-switch-to-saved-filter-groups "MyList"))
+  
+(add-hook 'ibuffer-mode-hook 'my-ibuffer-hook)
+
 (provide 'config-interface)

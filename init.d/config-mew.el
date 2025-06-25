@@ -21,7 +21,7 @@
       'mew-send-hook))
 
 ;; 下面的图标路径和安装路径有关，具体请看Mew的安装过程
-(setq mew-icon-directory "~/.emacs.d/elpa/mew-20240911.749/etc")
+(setq mew-icon-directory "/opt/local/share/emacs/site-lisp/mew/etc")
 
 
 ;; 不用频繁输入密码
@@ -85,11 +85,18 @@
 
 
 ;; 可以阅读html邮件
+(require 'w3m-load)
+(require 'mime-w3m)
 (require 'mew-w3m)
 (setq mew-use-text/html t)
 (setq mew-mime-multipart-alternative-list '("text/html" "text/plain" ".*"))
+(setq mew-prog-html '(mew-mime-text/html mew-mime-text/html-ext))
+(setq mew-prog-text/html 'mew-mime-text/html-w3m)
+(setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
 (setq mew-use-w3m-minor-mode t)
 (setq mew-w3m-auto-insert-image t)
+(add-hook 'mew-message-hook 'mew-w3m-minor-mode-setter)
+(define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
 
 ;;mew启动时不自动获取邮件
 (setq mew-auto-get nil)
