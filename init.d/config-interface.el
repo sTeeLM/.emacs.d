@@ -70,7 +70,7 @@
 (setq initial-scratch-message
 ";; This buffer is for text that is not saved, and for Lisp evaluation. \n\
 ;; To create a file, visit it with `\\[find-file]' and enter text in its buffer.\n\
-;; 使用`\\[mew]'打开邮件，使用`\\[Cal]'打开日历\n\
+;; 使用`\\[mew]'打开邮件，使用`\\[cal]'打开日历\n\
 ;; 祝你有一个好心情！\n\
 ")
 

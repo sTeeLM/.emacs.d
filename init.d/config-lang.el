@@ -39,6 +39,12 @@
 ;; 加载 basedict 拼音词库。
 (pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
 
+;; 加载 bigdict 拼音词库。
+(add-to-list 'load-path "~/.emacs.d/pyim-bigdict")
+(require 'pyim-bigdict)
+(pyim-bigdict-enable)  ; 拼音词库，五笔用户 *不需要* 此行设置 
+
+
 ;; 将 Emacs 默认输入法设置为 pyim.
 (setq default-input-method "pyim")
 
@@ -57,7 +63,11 @@
 (global-set-key (kbd "M-j") 'pyim-convert-string-at-point)
 
 ;; 按 "C-<return>" 将光标前的 regexp 转换为可以搜索中文的 regexp.
-(define-key minibuffer-local-map (kbd "C-<return>") 'pyim-cregexp-convert-at-point)
+(define-key minibuffer-local-map (kbd "C-RET") 'pyim-cregexp-convert-at-point)
 
+;; 在MACOS的系统中取消了C-SPC，我们把这个按键组合绑定为切换输入
+;; 不知道为什么C-SPC和C-@区分不开
+(global-set-key (kbd "C-SPC") 'toggle-input-method)
+(global-set-key (kbd "C-@") 'toggle-input-method)
 
 (provide 'config-lang)

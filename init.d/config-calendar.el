@@ -228,7 +228,7 @@
 (keymap-set cfw:calendar-mode-map "d" 'cfw:cal-view-diary)
 (keymap-set cfw:calendar-mode-map "R" 'cfw:cal-clear-cache-refresh)
 
-(defun Cal ()
+(defun cal ()
   (interactive)
   (cfw:open-calendar-buffer
    :contents-sources
