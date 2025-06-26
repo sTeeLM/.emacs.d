@@ -133,4 +133,23 @@
 ;; 不自动保存打开文件
 (desktop-save-mode 0)
 
+;; 在term里运行一个进程
+(defun my-term-handle-exit (&optional process-name msg)
+  (message "%s quit: %s" process-name (replace-regexp-in-string "\n$" "" msg))
+  (kill-buffer (current-buffer)))
+
+(advice-add 'term-handle-exit :after 'my-term-handle-exit)
+
+(defun term-run-command (shell-command-string buffer-name &optional show)
+  "在term里运行一个shell命令"
+  (if (require 'term nil t)
+      (let ((prog (split-string-shell-command shell-command-string)))
+        (save-current-buffer
+         (set-buffer (apply #'make-term buffer-name (car prog) nil (cdr prog)))
+         (term-char-mode))
+        (when show
+          (pop-to-buffer-same-window (format "*%s*" buffer-name))))
+    (error "term is not present or not loaded on this version of Emacs")))
+
+
 (provide 'config-system)

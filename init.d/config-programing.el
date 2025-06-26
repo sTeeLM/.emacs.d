@@ -1,4 +1,5 @@
 
+
 ;; 编程相关的所有配置
 
 ;; 将文件模式和文件后缀关联起来
@@ -19,10 +20,10 @@
   (message "my-mode-auto-pair run")  
   (setq skeleton-pair-alist '(
                               '((?\( _ ?\))
-				(?\[ _ ?\])
-				(?{ _ ?})
-				(?< _ ?>)
-				(?' _ ?')
+				                (?\[ _ ?\])
+				                (?{ _ ?})
+				                (?< _ ?>)
+				                (?' _ ?')
                                 (?\" _ ?\"))))
   (setq skeleton-pair t)
   (local-set-key (kbd "(") 'skeleton-pair-insert-maybe)
@@ -47,9 +48,9 @@
     (column-number-mode)
     (whitespace-mode -1)
     (setq c-default-style
-	  '((java-mode . "java")
-	    (awk-mode . "awk")
-	    (other . "linux")))
+	      '((java-mode . "java")
+	        (awk-mode . "awk")
+	        (other . "linux")))
     (c-set-style "linux")
     (setq c-basic-offset 4)
     (setq tab-width 4)
@@ -95,8 +96,8 @@
   (interactive)
   (indent-region (point-min) (point-max))
   (message "format successfully"))
-                                        ;绑定到F4键
-(global-set-key [f4] 'indent-whole)
+;; 绑定到F4键
+(global-set-key (kbd "<f4>") 'indent-whole)
 
 
 ;; 代码折叠
@@ -115,6 +116,38 @@
 ;; C-c @ C-s show block
 ;; C-c @ C-h hide block
 ;; C-c @ C-c toggle hide/show
+
+;; 在窗口底部弹一个小窗，运行交互式程序
+;; 反复按可以打开－关闭－打开
+(defun toggle-mini-shell (cmd buffer-name)
+  (let ((real-buffer-name (format "*%s*" buffer-name)))
+  (save-current-buffer
+    (unless (get-buffer real-buffer-name)
+      (term-run-command cmd buffer-name))
+    (if (get-buffer-window real-buffer-name)
+        (delete-window (get-buffer-window real-buffer-name))
+      (progn
+        (display-buffer-in-side-window (get-buffer real-buffer-name) '(side bottom))
+        (select-window (get-buffer-window real-buffer-name) 'visible))))))
+
+;; Python 小窗
+(defun toggle-python-mini-shell ()
+  (interactive)
+  (toggle-mini-shell "python" "Python-Shell"))
+(global-set-key  (kbd "<f1>") 'toggle-python-mini-shell)
+
+
+;; CLisp 小窗 
+(defun toggle-clisp-mini-shell ()
+  (interactive)
+  (toggle-mini-shell "clisp" "CLisp-Shell"))
+(global-set-key  (kbd "<f2>") 'toggle-clisp-mini-shell)
+
+;; Bash小窗，可以写程序，然后快速切换到shell，编译
+(defun toggle-bash-mini-shell ()
+  (interactive)
+  (toggle-mini-shell "bash -i" "Bash-Shell"))
+(global-set-key  (kbd "<f3>") 'toggle-bash-mini-shell)
 
 
 (provide 'config-programing)
