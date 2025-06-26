@@ -85,18 +85,25 @@
 
 
 ;; 可以阅读html邮件
-(require 'w3m-load)
 (require 'mime-w3m)
-(require 'mew-w3m)
 (setq mew-use-text/html t)
 (setq mew-mime-multipart-alternative-list '("text/html" "text/plain" ".*"))
 (setq mew-prog-html '(mew-mime-text/html mew-mime-text/html-ext))
-(setq mew-prog-text/html 'mew-mime-text/html-w3m)
-(setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
-(setq mew-use-w3m-minor-mode t)
-(setq mew-w3m-auto-insert-image t)
-(add-hook 'mew-message-hook 'mew-w3m-minor-mode-setter)
-(define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
+
+
+;;;; HTML阅读器配置
+;; (1) 使用内置的shr阅读HTML邮件，且不显示背景色
+(setq shr-use-colors nil)
+
+;; (2) 使用w3m阅读html邮件
+;; (require 'w3m-load)
+;; (require 'mew-w3m)
+;; (setq mew-use-w3m-minor-mode t)
+;; (setq mew-w3m-auto-insert-image t)
+;; (add-hook 'mew-message-hook 'mew-w3m-minor-mode-setter)
+;; (setq mew-prog-text/html 'mew-mime-text/html-w3m)
+;; (setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
+;; (define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
 
 ;;mew启动时不自动获取邮件
 (setq mew-auto-get nil)

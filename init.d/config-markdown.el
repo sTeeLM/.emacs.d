@@ -6,6 +6,40 @@
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
+;; 使用w3m预览
+(defun markdown-live-preview-window-w3m (file)
+  "Preview FILE with w3m. To be used with `markdown-live-preview-window-function'."
+  (if (require 'w3m nil t)
+      (let ((w3m-display-mode 'plain))
+        (w3m (concat "file://" file) t)
+        (get-buffer "*w3m*"))
+    (error "w3m is not present or not loaded on this version of Emacs")))
+
+;; 让term在lynx退出的时候一起退出
+(defun my-term-handle-exit (&optional process-name msg)
+  (message "%s | %s" process-name msg)
+  (kill-buffer (current-buffer)))
+
+(advice-add 'term-handle-exit :after 'my-term-handle-exit)
+
+;; 使用lynx预览，C-l/C-w刷新页面
+(defun markdown-live-preview-window-lynx (file)
+  "Preview FILE with lynx. To be used with `markdown-live-preview-window-function'."
+  (if (require 'term nil t)
+      (let ((prog (split-string-shell-command (format "lynx %s" file))))
+        (message "will preview file %s" file)
+        (save-current-buffer
+         (set-buffer (apply #'make-term "lynx" (car prog) nil (cdr prog)))
+         (term-char-mode))
+        (pop-to-buffer-same-window "*lynx*"))
+    (error "w3m is not present or not loaded on this version of Emacs")))
+
+;; 在这行选择用什么方式预览
+;; markdown-live-preview-window-lynx
+;; markdown-live-preview-window-w3m
+;; 注释掉使用默认eww
+; (setq markdown-live-preview-window-function 'markdown-live-preview-window-lynx)
+
 
 (defun markdown-insert-inline-item-from-file (item is-image)
   "copy file to 'assets', insert it as inline image or link"

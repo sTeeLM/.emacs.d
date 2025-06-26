@@ -82,29 +82,88 @@
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 
 
-(string-match ".*/Diary/[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]/index.md" "/Volumes/Diary/2004/04/06/index.md")
-; 分组的定义
+;; ((predicate "predicate"
+;;             #f(compiled-function (buf qualifier) #<bytecode
+;;                                  0x3fb8e04ce457962>))
+;;  (content "content"
+;;           #f(compiled-function (buf qualifier) #<bytecode
+;;                                0x159b62c187b845e2>))
+;;  (visiting-file "visiting a file"
+;;                 #f(compiled-function (buf qualifier) #<bytecode
+;;                                      0x9d3f191d399d96a>))
+;;  (modified "modified"
+;;            #f(compiled-function (buf qualifier) #<bytecode
+;;                                 0x5e33519cc4afb1e>))
+;;  (size-lt "size less than"
+;;           #f(compiled-function (buf qualifier) #<bytecode
+;;                                0x1befb789d8f7b78a>))
+;;  (size-gt "size greater than"
+;;           #f(compiled-function (buf qualifier) #<bytecode
+;;                                0x1be97789d8f7a38a>))
+;;  (directory "directory name"
+;;             #f(compiled-function (buf qualifier) #<bytecode
+;;                                  0x53e8da5aa937d06>))
+;;  (file-extension "filename extension"
+;;                  #f(compiled-function (buf qualifier) #<bytecode
+;;                                       0x13615f8054c2cdd5>))
+;;  (basename "file basename"
+;;            #f(compiled-function (buf qualifier) #<bytecode
+;;                                 -0x6c3c16cac8b363c>))
+;;  (filename "full file name"
+;;            #f(compiled-function (buf qualifier) #<bytecode
+;;                                 0x176cb927eda9b22c>))
+;;  (starred-name "starred buffer name"
+;;                #f(compiled-function (buf qualifier) #<bytecode
+;;                                     -0x12b4deaf3b1abae8>))
+;;  (process "process"
+;;           #f(compiled-function (buf qualifier) #<bytecode
+;;                                0x5e33504ffe6fb1e>))
+;;  (name "buffer name"
+;;        #f(compiled-function (buf qualifier) #<bytecode
+;;                             0xdc5a5b9f3bb812e>))
+;;  (derived-mode "derived mode"
+;;                #f(compiled-function (buf qualifier) #<bytecode
+;;                                     0x87cd59349021609>))
+;;  (used-mode "major mode in use"
+;;             #f(compiled-function (buf qualifier) #<bytecode
+;;                                  0x15a5a5da24b2053f>))
+;;  (mode "major mode"
+;;        #f(compiled-function (buf qualifier) #<bytecode
+;;                             0x15a5a5da24b2053f>)))
+
+;分组的定义
+
+(setq ibuffer-diary-markdown ".*/Diary/[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]/index.md")
+(setq ibuffer-diary-preview ".*/Diary/[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]/index.html")
+
 (setq ibuffer-saved-filter-groups
  '(("MyList"
     ("Dired"    (mode          . dired-mode))    ; Filter by mode
     ("Mail"     (or                                  ; Or multiple!
-	            (mode . mew-summary-mode)
-	            (mode . mew-message-mode)))
+                (mode . mew-summary-mode)
+                (mode . mew-message-mode)))
     ("Term"     (or                                  ; Or multiple!
-	            (mode . vterm-mode)
-	            (mode . term-mode)
+                (mode . vterm-mode)
+                (mode . term-mode)
                 (mode . shell-mode)))
     ("Calendar" (or                                  ; Or multiple!
-	            (mode . calendar-mode)
-	            (mode . cfw:calendar-mode)
+                (mode . calendar-mode)
+                (mode . cfw:calendar-mode)
                 (mode . cfw:details-mode)))
     ("Diary"    (or
-                 (and
-                  (filename . ".*/Diary/[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]/index.md")
-                  (mode . markdown-mode))
-                 (and
-                  (filename . ".*/Diary/[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]/index.html")
-                  (mode . eww-mode))))
+                  (and
+                   (filename . ibuffer-diary-markdown)
+                   (mode . markdown-mode))
+                  (and
+                   (filename . ibuffer-diary-preview)
+                   (mode . eww-mode))
+                  (and
+                   (filename . ibuffer-diary-preview)
+                   (name . "*lynx*"))
+                  (and
+                   (filename . ibuffer-diary-preview)
+                   (mode . w3m-mode))
+                 ))
     ("Stars"    (starred-name))                  ; Group *starred*
     ("Unsaved"  (modified))                      ; All unsaved buffers
     )))
