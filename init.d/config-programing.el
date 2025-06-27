@@ -117,6 +117,28 @@
 ;; C-c @ C-h hide block
 ;; C-c @ C-c toggle hide/show
 
+;; run-python C-d可以推出，并且进程推出后自动关闭buffer
+(defun kill-inferior-python ()
+  (interactive)
+  (let ((kill-buffer-query-functions nil))
+    (kill-buffer)))
+
+(defun inferior-python-quit-function (process event)
+  (message "%s quit" process)
+  (let ((buffer (process-buffer process)) )
+    (when buffer
+      (kill-buffer buffer))))
+
+;; run-python
+(defun my-inferior-python-mode-fun ()
+  (local-set-key (kbd "C-d") 'kill-inferior-python)
+  (let ((process (get-buffer-process (current-buffer))))
+    (when process
+      (set-process-sentinel process 'inferior-python-quit-function))))
+  
+(add-hook 'inferior-python-mode-hook 'my-inferior-python-mode-fun)
+
+
 ;; 在窗口底部弹一个小窗，运行交互式程序
 ;; 反复按可以打开－关闭－打开
 (defun toggle-mini-shell (cmd buffer-name)
@@ -130,10 +152,25 @@
         (display-buffer-in-side-window (get-buffer real-buffer-name) '(side bottom))
         (select-window (get-buffer-window real-buffer-name) 'visible))))))
 
+;; python在toggle-mini-shell由于TERMINFO的问题，不能自动补全，我们特殊处理
+(require 'python)
+(defun toggle-mini-shell-python (cmd buffer-name)
+  (let ((real-buffer-name (format "*%s*" buffer-name)))
+  (save-current-buffer
+    (unless (get-buffer real-buffer-name)
+      (python-shell-make-comint cmd buffer-name))
+    (if (get-buffer-window real-buffer-name)
+        (delete-window (get-buffer-window real-buffer-name))
+      (progn
+        (display-buffer-in-side-window (get-buffer real-buffer-name) '(side bottom))
+        (select-window (get-buffer-window real-buffer-name) 'visible))))))
+
+
 ;; Python 小窗
+;; 可以替代计算器
 (defun toggle-python-mini-shell ()
   (interactive)
-  (toggle-mini-shell "python -i" "python-mini-shell"))
+  (toggle-mini-shell-python "python" "python-mini-shell"))
 (global-set-key  (kbd "<f1>") 'toggle-python-mini-shell)
 
 
@@ -143,7 +180,9 @@
   (toggle-mini-shell "clisp" "clisp-mini-shell"))
 (global-set-key  (kbd "<f2>") 'toggle-clisp-mini-shell)
 
-;; Bash小窗，可以写程序，然后快速切换到shell，编译
+
+;; Bash小窗
+;; 可以写程序，然后快速切换到shell，编译，再切换回代码
 (defun toggle-bash-mini-shell ()
   (interactive)
   (toggle-mini-shell "bash -i" "bash-mini-shell"))

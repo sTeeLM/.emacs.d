@@ -91,7 +91,8 @@
     ("Term"     (or                                  ; Or multiple!
                  (mode . vterm-mode)
                  (mode . term-mode)
-                 (mode . shell-mode)))
+                 (mode . shell-mode)
+                 (mode . inferior-python-mode)))
     ("Calendar" (or                                  ; Or multiple!
                  (mode . calendar-mode)
                  (mode . cfw:calendar-mode)
