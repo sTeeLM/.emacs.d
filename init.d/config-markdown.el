@@ -27,7 +27,12 @@
 ; (setq markdown-live-preview-window-function 'markdown-live-preview-window-lynx)
 
 
-(defun markdown-insert-inline-item-from-file (item is-image)
+;; 将一个文件copy到同级assets目录下，并插入markdown文档中
+;; item: 文件路径,相对\绝对都可以
+;; is-image: 是一个图片吗？
+;; with-link: 如果是图片，需要带点击链接吗？
+;; 注意：非图片文件插入文档，总是可以点击
+(defun markdown-insert-inline-item-from-file (item is-image &optional with-link)
   "copy file to 'assets', insert it as inline image or link"
   (let
       (
@@ -51,10 +56,15 @@
              item-file-path
              assets-item-path 0) ; if exist, prompt overwirte?
             (if is-image
-                (markdown-insert-inline-image
-                 (file-name-nondirectory item)
-                 (url-encode-url assets-item-url)
-                 (file-name-nondirectory item))
+                (if with-link
+                 (markdown-insert-inline-link
+                  (format "![%s](%s)" (file-name-nondirectory item) (url-encode-url assets-item-url))
+                  (url-encode-url assets-item-url)
+                  (file-name-nondirectory item))
+                 (markqdown-insert-inline-image
+                  (file-name-nondirectory item)
+                  (url-encode-url assets-item-url)
+                  (file-name-nondirectory item)))
               (markdown-insert-inline-link
                (file-name-nondirectory item)
                (url-encode-url assets-item-url)
@@ -67,7 +77,15 @@
       )  
   )
 
-;; 插入图片到文件中，该文件将被copy到assets目录
+;; 插入内嵌图片到文件中，该文件将被copy到assets目录
+;; 并且带有点击链接
+(defun markdown-insert-clickable-inline-image-from-file (image)
+  "copy file to 'assets', insert it as inline image, with clickable link"
+  (interactive "fInsert image file: ")
+  (markdown-insert-inline-item-from-file image t t))
+
+
+;; 插入内嵌图片到文件中，该文件将被copy到assets目录
 (defun markdown-insert-inline-image-from-file (image)
   "copy file to 'assets', insert it as inline image"
   (interactive "fInsert image file: ")
@@ -93,6 +111,7 @@
   (auto-fill-mode -1)
   (local-set-key (kbd "C-c C-d") 'insert-current-date)
   (local-set-key (kbd "C-c i") 'markdown-insert-inline-image-from-file)
+  (local-set-key (kbd "C-c I") 'markdown-insert-clickable-inline-image-from-file)
   (local-set-key (kbd "C-c f") 'markdown-insert-inline-link-from-file))
 
 (add-hook 'markdown-mode-hook 'my-md-hook)

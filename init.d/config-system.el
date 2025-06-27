@@ -1,4 +1,4 @@
-;;设置打开文件的缺省路径
+;设置打开文件的缺省路径
 (setq default-directory "~/")
 
 ;;关闭烦人的出错时的提示声
@@ -129,6 +129,10 @@
 
 ;;ido模式中不保存目录列表,解决退出Emacs时ido要询问编码的问题。
 (setq ido-save-directory-list-file nil)
+
+;; C-x C-d 不调用ido-list-directory而是调用dired
+(require 'dired)
+(global-set-key (kbd "C-x C-d") 'ido-dired)
 
 ;; 不自动保存打开文件
 (desktop-save-mode 0)

@@ -133,20 +133,20 @@
 ;; Python 小窗
 (defun toggle-python-mini-shell ()
   (interactive)
-  (toggle-mini-shell "python" "Python-Shell"))
+  (toggle-mini-shell "python -i" "python-mini-shell"))
 (global-set-key  (kbd "<f1>") 'toggle-python-mini-shell)
 
 
 ;; CLisp 小窗 
 (defun toggle-clisp-mini-shell ()
   (interactive)
-  (toggle-mini-shell "clisp" "CLisp-Shell"))
+  (toggle-mini-shell "clisp" "clisp-mini-shell"))
 (global-set-key  (kbd "<f2>") 'toggle-clisp-mini-shell)
 
 ;; Bash小窗，可以写程序，然后快速切换到shell，编译
 (defun toggle-bash-mini-shell ()
   (interactive)
-  (toggle-mini-shell "bash -i" "Bash-Shell"))
+  (toggle-mini-shell "bash -i" "bash-mini-shell"))
 (global-set-key  (kbd "<f3>") 'toggle-bash-mini-shell)
 
 
