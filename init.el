@@ -27,7 +27,7 @@
 (require 'config-programing)
 
 ;;邮件设置
-(require 'config-mew)
+(require 'config-mail)
 
 ;;vterm设置
 (require 'config-vterm)
@@ -46,7 +46,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    '(calfw calfw-cal color-theme color-theme-modern magit markdown-mode
-           popup pyim pyim-basedict solarized-theme xclip)))
+           popup pyim pyim-basedict solarized-theme tree-sitter xclip)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

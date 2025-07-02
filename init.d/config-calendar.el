@@ -17,6 +17,7 @@
 
 (define-error 'prepare-archive-error "can not prepare diary archive")
 
+
 (defun my-diary-create-empty-diary (file year mon day)
   (message "my-diary-create-empty-diary %s" file)
   (let ((display-buffer-overriding-action
@@ -66,19 +67,22 @@
           ;(switch-to-buffer-other-window (find-file diary-file))
         (my-diary-create-empty-diary diary-file (nth 2 current-date) (nth 0 current-date) (nth 1 current-date)))))
 
-(defun my-diary-view-entries (&optional arg)
+(defun my-diary-view-entry (current-date)
+  (message "my-diary-view-entrie! whill look diary %s" current-date)
+  (condition-case err
+      (progn
+        (my-diary-prepare-archive my-diary-root)
+        (my-diary-open-diary-file current-date))
+    (file-error
+     (message "file error! %s" err))
+    (prepare-archive-error
+     (message "prepare archive failed! %s" err))))
+
+
+(defun cal-view-entries (&optional arg)
   (interactive "p")
   (let ((current-date (calendar-cursor-to-date t)))         
-    (message "my-diary-view-entrie! whill look diary %s" current-date)
-    (condition-case err
-        (progn
-          (my-diary-prepare-archive my-diary-root)
-          (my-diary-open-diary-file current-date))
-      (file-error
-       (message "file error! %s" err))
-      (prepare-archive-error
-       (message "prepare archive failed! %s" err)))))
-
+    (my-diary-view-entry current-date)))
 
 ;;设置我所在地方的经纬度，calendar里有个功能是日月食的预测，和你的经纬度相联系的。
 ;; 让emacs能计算日出日落的时间，在 calendar 上用 S 即可看到
@@ -130,7 +134,7 @@
 
 (defun my-calendar-hook()
   (calendar-mark-holidays)
-  (local-set-key (kbd "d") 'my-diary-view-entries)
+  (local-set-key (kbd "d") 'cal-view-entries)
   (message "my-calendar-hook hook run"))
 
 (add-hook 'calendar-mode-hook 'my-calendar-hook)
@@ -207,8 +211,7 @@
   "Show dairy on the selected date."
   (interactive)
   (let* ((cursor-date (cfw:cursor-to-nearest-date)))
-    (message "current date is %s" cursor-date)
-    (my-diary-open-diary-file cursor-date)))
+    (my-diary-view-entry cursor-date)))
 
 (defun cfw:cal-clear-cache-refresh () 
   "Clear cache and refresh all dairy source."
@@ -241,6 +244,11 @@
     (cfw:cal-create-source-from-ical-url "运动" "https://ical.madcat.cc/calanders/michael/cbf482ec-b369-cdde-f982-ea984f45e49a/" "#FECC00" "michael")
     (cfw:cal-create-source-from-ical-url "其他" "https://ical.madcat.cc/calanders/michael/044b81cb-7f8d-15b7-9127-48ef1353150b/" "#D07669" "michael")
     )))
+
+;; 进入emacs的时候，默认显示日历
+(setq initial-buffer-choice
+      (lambda () (cal)
+        (get-buffer "*cfw-calendar*")))
 
   
 ;;Calendar模式支持各种方式来更改当前日期

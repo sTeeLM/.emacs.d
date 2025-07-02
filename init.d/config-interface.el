@@ -92,7 +92,8 @@
                  (mode . vterm-mode)
                  (mode . term-mode)
                  (mode . shell-mode)
-                 (mode . inferior-python-mode)))
+                 (mode . inferior-python-mode)
+                 (mode . inferior-emacs-lisp-mode)))
     ("Calendar" (or                                  ; Or multiple!
                  (mode . calendar-mode)
                  (mode . cfw:calendar-mode)

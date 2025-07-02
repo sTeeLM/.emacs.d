@@ -61,7 +61,7 @@
                   (format "![%s](%s)" (file-name-nondirectory item) (url-encode-url assets-item-url))
                   (url-encode-url assets-item-url)
                   (file-name-nondirectory item))
-                 (markqdown-insert-inline-image
+                 (markdown-insert-inline-image
                   (file-name-nondirectory item)
                   (url-encode-url assets-item-url)
                   (file-name-nondirectory item)))

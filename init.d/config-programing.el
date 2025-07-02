@@ -97,7 +97,7 @@
   (indent-region (point-min) (point-max))
   (message "format successfully"))
 ;; 绑定到F4键
-(global-set-key (kbd "<f4>") 'indent-whole)
+(global-set-key (kbd "<f5>") 'indent-whole)
 
 
 ;; 代码折叠
@@ -135,35 +135,39 @@
   (let ((process (get-buffer-process (current-buffer))))
     (when process
       (set-process-sentinel process 'inferior-python-quit-function))))
-  
+
 (add-hook 'inferior-python-mode-hook 'my-inferior-python-mode-fun)
 
+;; 使用tree-sitter?
+;;(require 'tree-sitter)
+;;(when (treesit-available-p)
+;;  (global-tree-sitter-mode))
 
 ;; 在窗口底部弹一个小窗，运行交互式程序
 ;; 反复按可以打开－关闭－打开
 (defun toggle-mini-shell (cmd buffer-name)
   (let ((real-buffer-name (format "*%s*" buffer-name)))
-  (save-current-buffer
-    (unless (get-buffer real-buffer-name)
-      (term-run-command cmd buffer-name))
-    (if (get-buffer-window real-buffer-name)
-        (delete-window (get-buffer-window real-buffer-name))
-      (progn
-        (display-buffer-in-side-window (get-buffer real-buffer-name) '(side bottom))
-        (select-window (get-buffer-window real-buffer-name) 'visible))))))
+    (save-current-buffer
+      (unless (get-buffer real-buffer-name)
+        (term-run-command cmd buffer-name))
+      (if (get-buffer-window real-buffer-name)
+          (delete-window (get-buffer-window real-buffer-name))
+        (progn
+          (display-buffer-in-side-window (get-buffer real-buffer-name) '(side bottom))
+          (select-window (get-buffer-window real-buffer-name) 'visible))))))
 
 ;; python在toggle-mini-shell由于TERMINFO的问题，不能自动补全，我们特殊处理
 (require 'python)
 (defun toggle-mini-shell-python (cmd buffer-name)
   (let ((real-buffer-name (format "*%s*" buffer-name)))
-  (save-current-buffer
-    (unless (get-buffer real-buffer-name)
-      (python-shell-make-comint cmd buffer-name))
-    (if (get-buffer-window real-buffer-name)
-        (delete-window (get-buffer-window real-buffer-name))
-      (progn
-        (display-buffer-in-side-window (get-buffer real-buffer-name) '(side bottom))
-        (select-window (get-buffer-window real-buffer-name) 'visible))))))
+    (save-current-buffer
+      (unless (get-buffer real-buffer-name)
+        (python-shell-make-comint cmd buffer-name))
+      (if (get-buffer-window real-buffer-name)
+          (delete-window (get-buffer-window real-buffer-name))
+        (progn
+          (display-buffer-in-side-window (get-buffer real-buffer-name) '(side bottom))
+          (select-window (get-buffer-window real-buffer-name) 'visible))))))
 
 
 ;; Python 小窗
@@ -178,7 +182,7 @@
 (defun toggle-clisp-mini-shell ()
   (interactive)
   (toggle-mini-shell "clisp" "clisp-mini-shell"))
-(global-set-key  (kbd "<f2>") 'toggle-clisp-mini-shell)
+(global-set-key  (kbd "<f4>") 'toggle-clisp-mini-shell)
 
 
 ;; Bash小窗
@@ -187,6 +191,34 @@
   (interactive)
   (toggle-mini-shell "bash -i" "bash-mini-shell"))
 (global-set-key  (kbd "<f3>") 'toggle-bash-mini-shell)
+
+(require 'ielm)
+;; elisp 小窗
+(defun toggle-elisp-mini-shell ()
+  (interactive)
+  (let ((buffer-name "*elisp-mini-shell*"))
+    (save-current-buffer
+      (unless (get-buffer buffer-name)
+        (set-buffer (get-buffer-create buffer-name))
+        (inferior-emacs-lisp-mode))
+      (if (get-buffer-window buffer-name)
+          (delete-window (get-buffer-window buffer-name))
+        (progn
+          (display-buffer-in-side-window (get-buffer buffer-name) '(side bottom))
+          (select-window (get-buffer-window buffer-name) 'visible))))))
+
+(defun inferior-emacs-lisp-quit-function (process event)
+  (message "%s quit" process)
+  (let ((buffer (process-buffer process)) )
+    (when buffer
+      (kill-buffer buffer))))
+
+(defun my-inferior-emacs-lisp-mode-fun ()
+  (let ((process (get-buffer-process (current-buffer))))
+    (when process
+      (set-process-sentinel process 'inferior-emacs-lisp-quit-function))))
+(add-hook 'inferior-emacs-lisp-mode-hook 'my-inferior-emacs-lisp-mode-fun)
+(global-set-key  (kbd "<f2>") 'toggle-elisp-mini-shell)
 
 
 (provide 'config-programing)

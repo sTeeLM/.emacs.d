@@ -11,4 +11,7 @@
 ;; 默认查找中文词典
 (setq dictionary-default-dictionary "*")
 
+;; ipsell设置
+(setq ispell-program-name "ispell")
+
 (provide 'config-dictionary) 

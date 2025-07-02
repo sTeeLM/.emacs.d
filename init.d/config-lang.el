@@ -1,6 +1,7 @@
 ;;;; 设置编辑环境
 ;; 设置为中文简体语言环境
-(set-language-environment 'Chinese-GB18030)
+;(set-language-environment 'Chinese-GB18030)
+(set-language-environment 'UTF-8)
 
 ;; 设置emacs 使用 utf-8
 (setq locale-coding-system 'utf-8)
