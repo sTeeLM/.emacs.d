@@ -2,10 +2,10 @@
 (autoload 'mew "mew" nil t)
 (autoload 'mew-send "mew" nil t)
 
-(add-to-list 'load-path "~/.emacs.d/mew-mbox")
-(require 'mew-mbox)
-(setq mew-mbox-verbose t)
-(setq mew-mbox-imap-checker-proc "/Users/michael/mail-checker/imapcheck")
+;;(add-to-list 'load-path "~/.emacs.d/mew-mbox")
+;;(require 'mew-mbox)
+;;(setq mew-mbox-verbose t)
+;;(setq mew-mbox-imap-checker-proc "/Users/michael/mail-checker/imapcheck")
 
 ;; Optional setup (Read Mail menu for Emacs 21):
 (if (boundp 'read-mail-command)

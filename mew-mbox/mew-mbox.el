@@ -13,6 +13,7 @@
 ;;; Code:
 
 (require 'mew)
+(require 'mew-mbox-buffer)
 (require 'mew-mbox-proto)
 (require 'mew-mbox-msg)
 (require 'tabulated-list)
@@ -38,7 +39,6 @@
 
 (define-key mew-mbox-mode-map "v" 'mew-mbox-view-mbox)
 (define-key mew-mbox-mode-map (kbd "RET") 'mew-mbox-view-mbox)
-(define-key mew-mbox-mode-map "C" 'mew-mbox-change-case)
 (define-key mew-mbox-mode-map "u" 'mew-mbox-update-mbox)
 (define-key mew-mbox-mode-map "U" 'mew-mbox-update-all)
 (define-key mew-mbox-mode-map "r" 'mew-mbox-refresh)
@@ -49,9 +49,8 @@
 (define-key mew-summary-mode-map "G"    'mew-mbox-open-buffer)
 
 (defvar mew-mbox-filter-zero-na nil)
-(defvar mew-mbox-buffer-alist nil)
 
-(define-derived-mode mew-mbox-mode tabulated-list-mode "Mew Mail List"
+(define-derived-mode mew-mbox-mode tabulated-list-mode "Mew MailBox List"
   (add-hook 'tabulated-list-revert-hook 'mew-mbox-buffers-revert nil t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -59,8 +58,8 @@
   "定时刷新主页面，如果buffer被关闭，停止timer。因为主页面上的mbox的信息可能会定时更新。"
   (mew-mbox-msg "mew-mbox-refresh-func called for buffer %s" buffer)
   (when buffer
-      (with-current-buffer buffer
-        (mew-mbox-refresh))))
+    (with-current-buffer buffer
+      (mew-mbox-refresh))))
 
 
 (defun mew-mbox-create-refresh-timer (buffer)
@@ -68,26 +67,6 @@
   (let ((timer (run-with-idle-timer  mew-mbox-refresh-interval t 'mew-mbox-refresh-func buffer)))
     (mew-mbox-msg "timer %s for buffer %s created" timer buffer)
     timer))
-    
-(defun mew-mbox-get-buffer-property (buffer property)
-  "获取一个buffer的property，proto case timer"
-  (plist-get (alist-get buffer mew-mbox-buffer-alist) property))
-
-(defun mew-mbox-set-buffer-property (buffer property value)
-  "设置一个buffer的property，proto case timer, 如果没有buffer则创建之"
-  (let ((entry (alist-get buffer mew-mbox-buffer-alist)))
-    (when entry
-      (assq-delete-all buffer mew-mbox-buffer-alist))
-    (setq entry (plist-put entry property value))
-    (push (cons buffer entry) mew-mbox-buffer-alist)))
-
-(defun mew-mbox-is-member (buffer)
-  "buffer 是在管理列表中吗？"
-  (alist-get buffer mew-mbox-buffer-alist))
-
-(defun mew-mbox-del-member (buffer)
-  "从管理列表中删除一个buffer"
-  (setq mew-mbox-buffer-alist (assq-delete-all buffer mew-mbox-buffer-alist)))
 
 (defun mew-mbox-open-buffer ()
   "打开当前case下的主界面"
@@ -101,25 +80,25 @@
         (mew-mbox-mode)
         (mew-mbox-recreate-table)
         (tabulated-list-print))
-      (mew-mbox-proto-call (mew-mbox-proto-symbol mew-proto) 'init)
-      (mew-mbox-set-buffer-property buffer 'proto mew-proto)
-      (mew-mbox-set-buffer-property buffer 'case  mew-case)
-      (mew-mbox-set-buffer-property buffer 'timer (mew-mbox-create-refresh-timer buffer)))
+      (mew-mbox-proto-call (mew-mbox-proto-symbol mew-proto) 'init buffer)
+      (mew-mbox-buffer-set-property buffer 'proto mew-proto)
+      (mew-mbox-buffer-set-property buffer 'case  (or mew-case "default"))
+      (mew-mbox-buffer-set-property buffer 'refresh-timer (mew-mbox-create-refresh-timer buffer)))
     (display-buffer buffer)))
 
 (defun mew-mbox-close-buffer ()
   "在主界面关闭前进行清理"
   (let ((buffer (current-buffer)))
-    (when (mew-mbox-is-member buffer)
-      (let ((proto (mew-mbox-get-buffer-property buffer 'proto))
-            (timer (mew-mbox-get-buffer-property buffer 'timer)))
+    (when (mew-mbox-buffer-is-member buffer)
+      (let ((proto (mew-mbox-buffer-get-property buffer 'proto))
+            (timer (mew-mbox-buffer-get-property buffer 'refresh-timer)))
         (when timer
           (mew-mbox-msg "timer %s for buffer %s canceled" timer buffer)
           (cancel-timer timer))
         (when proto
-          (mew-mbox-proto-call (mew-mbox-proto-symbol proto) 'quit))
-        (mew-mbox-del-member buffer)))))
-  
+          (mew-mbox-proto-call (mew-mbox-proto-symbol proto) 'quit buffer))
+        (mew-mbox-buffer-del-member buffer)))))
+
 (add-hook 'kill-buffer-hook 'mew-mbox-close-buffer)
 
 (defun mew-mbox-view-mbox()
@@ -129,16 +108,11 @@
          case:folder)
     (if id
         (progn 
-        (setq case:folder (concat (car id) ":" (cadr id)))
-        (mew-summary-visit-folder case:folder t)))))
-
-(defun mew-mbox-change-case ()
-  (interactive)
-"改变配置case，显示新case下的mbox"
-)
+          (setq case:folder (concat (car id) ":" (cadr id)))
+          (mew-summary-visit-folder case:folder t)))))
 
 (defun mew-box-update-mbox()
-"更新界面上选中的mbox"
+  "更新界面上选中的mbox"
   (interactive)
   (let* ((id (tabulated-list-get-id))
          (case (car id))
@@ -148,12 +122,12 @@
       (setq proto (mew-mbox-fld-proto-symbol mbox))
       (mew-mbox-proto-call
        (mew-mbox-proto-test-proto proto)
-       'update-mbox case mbox))))
+       'update-mbox (current-buffer) mbox))))
 
 (defun mew-mbox-update-all()
-"更新所有mbox"
+  "更新所有mbox"
   (interactive)
-  (mew-mbox-proto-call 'update-all-mbox))
+  (mew-mbox-proto-call 'update-all-mbox (current-buffer)))
 
 (defun mew-mbox-refresh ()
   "更新界面"
@@ -170,13 +144,12 @@
 (defun mew-mbox-generate-entries ()
   "生成表格条目"
   ;;(mew-mbox-msg "mew-mbox-generate-entries called")
-  (let ((proto mew-proto)
-        (case mew-case)
+  (let (
         (no-zero-na mew-mbox-filter-zero-na)
         (entries))
     (setq entries (mew-mbox-proto-call
-                   (mew-mbox-proto-symbol proto)
-                   'generate-entries case no-zero-na))
+                   (mew-mbox-proto-symbol mew-proto)
+                   'generate-entries (current-buffer) no-zero-na))
     entries))
 
 (defun mew-mbox-sort-mail (el1 el2)
@@ -191,53 +164,49 @@
   "重新生成表格界面"
   (setq tabulated-list-format
 	    (vector
-         ; 更新中显示*
+         ;; 更新中显示*
          '("U" 1 t :pad-right 0)
-         ; 协议
+         ;; 协议
          '("P" 2 t :pad-right 0)
-         ; 最后更新时间
+         ;; 最后更新时间
 		 '("LAST-UPDATE" 20 t :pad-right 0 :left-align t)
-         ; 未读邮件数
-         '("MAIL" 10 mew-mbox-sort-mail :right-align t)
-         ; 配置名
+         ;; 总邮件数
+         '("MAIL-TOTAL" 10 mew-mbox-sort-mail :right-align t)
+         ;; 未读邮件数
+         '("MAIL-NEW" 10 mew-mbox-sort-mail :right-align t)
+         ;; 配置名
          '("CASE" 8 t)
-         ; 邮箱名
+         ;; 邮箱名
 		 '("MBOX" 8 t)))
-   (setq tabulated-list-use-header-line t)
-   (setq tabulated-list-entries 'mew-mbox-generate-entries)
-   (tabulated-list-init-header))
+  (setq tabulated-list-use-header-line t)
+  (setq tabulated-list-entries 'mew-mbox-generate-entries)
+  (tabulated-list-init-header))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun mew-mbox-status-update ()
-  (mew-mbox-proto-call (mew-mbox-proto-symbol mew-proto) 'status-update))
+  (let ((buffer (mew-mbox-find-buffer mew-case mew-proto)))
+    (when buffer
+      (mew-mbox-proto-call (mew-mbox-proto-symbol mew-proto) 'status-update buffer mew-init-p))))
 
 (defun mew-mbox-init ()
   "初始化函数, 在启动mew的时候调用"
   (mew-mbox-msg "mew-mbox-init called"))
-  
+
 
 (defun mew-mbox-quit()
-"清理函数，在mew推出时调用，关闭所有buffer"
+  "清理函数，在mew推出时调用，关闭所有buffer"
   (mew-mbox-msg "mew-mbox-quit called")
   (dolist (entry mew-mbox-buffer-alist)
-          (kill-buffer (car entry)))
-  (setq mew-mbox-buffer-alist nil))
+    (kill-buffer (car entry)))
+  (mew-mbox-buffer-clear))
 
-(defun mew-mbox-summary-ls-no-scan()
-  "切换summary视图的时候调用"
-  (let (case proto fld)
-    (mew-set '(case proto) (mew-summary-case-proto))
-    (setq fld (mew-case:folder-folder (buffer-name)))
-    (when (mew-summary-exclusive-p)
-      (mew-mbox-proto-call (mew-mbox-proto-symbol proto) 'ls-no-scan case fld))))
-  
+
 (defun mew-mbox-buffers-revert ()
   (mew-mbox-msg "mew-mail-sum-buffers-revert called"))
 
 (add-hook 'mew-status-update-hook 'mew-mbox-status-update)
 (add-hook 'mew-init-hook 'mew-mbox-init)
 (add-hook 'mew-quit-hook 'mew-mbox-quit)
-(add-hook 'mew-summary-ls-no-scan-hook 'mew-mbox-summary-ls-no-scan)
 
 (provide 'mew-mbox)

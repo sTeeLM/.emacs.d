@@ -107,7 +107,9 @@
 (defun my-md-hook ()
   (message "run my-md-hook")
   (markdown-live-preview-mode)
-;  (markdown-view-mode)
+;; Bold字体使用红色
+  (set-face-attribute 'markdown-bold-face nil :foreground "brightcyan")
+  (set-face-attribute 'bold nil :foreground "brightcyan")
   (auto-fill-mode -1)
   (local-set-key (kbd "C-c C-d") 'insert-current-date)
   (local-set-key (kbd "C-c i") 'markdown-insert-inline-image-from-file)
@@ -119,5 +121,6 @@
 ;; Markdown可以预览
 ;(custom-set-variables
 (setq markdown-command "pandoc -s -c /Users/michael/.emacs.d/pandoc/pandoc.css --metadata title=preview")
+
 
 (provide 'config-markdown)

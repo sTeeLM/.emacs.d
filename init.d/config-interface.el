@@ -1,6 +1,6 @@
 ;; 界面配置
-;(load-theme 'tango-dark t)
-(load-theme 'blue-mood t)
+(load-theme 'classic t)
+;;(load-theme 'blue-mood t)
 
 ;;(set-scroll-bar-mode nil)
 ;;取消滚动栏
@@ -12,20 +12,20 @@
 ;;取消工具栏
 
 ;;启动设置
-;(setq default-frame-alist
-;            '((vertical-scroll-bars)
-;              (top . 25)
-;               (left . 45)
-;               (width . 120)
-;               (height . 40)
-;               (background-color . "black")
-;               (foreground-color . "grey")
-;               (cursor-color . "gold1")
-;               (mouse-color . "gold1")
-;               (tool-bar-lines . 0)
-;               (menu-bar-lines . 1)
-;               (right-fringe)
-;               (left-fringe)))
+;;(setq default-frame-alist
+;;            '((vertical-scroll-bars)
+;;              (top . 25)
+;;               (left . 45)
+;;               (width . 120)
+;;               (height . 40)
+;;               (background-color . "black")
+;;               (foreground-color . "grey")
+;;               (cursor-color . "gold1")
+;;               (mouse-color . "gold1")
+;;               (tool-bar-lines . 0)
+;;               (menu-bar-lines . 1)
+;;               (right-fringe)
+;;               (left-fringe)))
 
 ;;启动自动最大化(数据自己调整，注意格式，如(top . 0)，圆点前后都要留有空格)
 (setq initial-frame-alist '((top . 0) (left . 0) (width . 142) (height . 49)))
@@ -68,7 +68,7 @@
 
 ;;修改scratch窗口消息
 (setq initial-scratch-message
-";; This buffer is for text that is not saved, and for Lisp evaluation. \n\
+      ";; This buffer is for text that is not saved, and for Lisp evaluation. \n\
 ;; To create a file, visit it with `\\[find-file]' and enter text in its buffer.\n\
 ;; 使用`\\[mew]'打开邮件，使用`\\[cal]'打开日历\n\
 ;; 祝你有一个好心情！\n\
@@ -83,31 +83,31 @@
 (setq ibuffer-diary-preview "index.html")
 
 (setq ibuffer-saved-filter-groups
- (quote (("default"
-    ("Dired"    (mode          . dired-mode))    ; Filter by mode
-    ("Mail"     (or                                  ; Or multiple!
-                 (mode . mew-summary-mode)
-                 (mode . mew-message-mode)))
-    ("Term"     (or                                  ; Or multiple!
-                 (mode . vterm-mode)
-                 (mode . term-mode)
-                 (mode . shell-mode)
-                 (mode . inferior-python-mode)
-                 (mode . inferior-emacs-lisp-mode)))
-    ("Calendar" (or                                  ; Or multiple!
-                 (mode . calendar-mode)
-                 (mode . cfw:calendar-mode)
-                 (mode . cfw:details-mode)))
-    ("Diary"    (or
-                 (filename . "index.md")
-                 (filename . "index.html")))
-    ("Stars"    (starred-name))                  ; Group *starred*
-    ("Unsaved"  (modified))                      ; All unsaved buffers
-    ))))
+      (quote (("default"
+               ("Dired"    (mode          . dired-mode))    ; Filter by mode
+               ("Mail"     (or                                  ; Or multiple!
+                            (mode . mew-summary-mode)
+                            (mode . mew-message-mode)))
+               ("Term"     (or                                  ; Or multiple!
+                            (mode . vterm-mode)
+                            (mode . term-mode)
+                            (mode . shell-mode)
+                            (mode . inferior-python-mode)
+                            (mode . inferior-emacs-lisp-mode)))
+               ("Calendar" (or                                  ; Or multiple!
+                            (mode . calendar-mode)
+                            (mode . cfw:calendar-mode)
+                            (mode . cfw:details-mode)))
+               ("Diary"    (or
+                            (filename . "index.md")
+                            (filename . "index.html")))
+               ("Stars"    (starred-name))                  ; Group *starred*
+               ("Unsaved"  (modified))                      ; All unsaved buffers
+               ))))
 ;; 默认不展示空分组
 (setq ibuffer-show-empty-filter-groups t)
 
- ;; Tell ibuffer to load the group automatically
+;; Tell ibuffer to load the group automatically
 (defun my-ibuffer-hook ()
   (ibuffer-switch-to-saved-filter-groups "default"))
 
@@ -128,5 +128,30 @@
      ((eq system-type 'darwin)  (call-process-shell-command (format "say %s" word)))
      (t (user-error (format "Unsupported OS: %s" system-type)))) ))
 (global-set-key (kbd "C-c p") 'pronounce-word)
+
+
+;; 保存一个窗口的位置，从而可以快速恢复
+(defun save-windows-dispos (arg)
+  (interactive "cSelect Register To Save:")
+  (window-configuration-to-register arg)
+  (message "Windows disposition saved to '%c'" arg))
+
+(defun load-windows-dispos (arg)
+  (interactive "cSelect Register To Load:")
+  (jump-to-register arg)
+  (message "Windows disposition loaded from '%c'" arg))
+
+(global-set-key (kbd "<f10>") 'save-windows-dispos)              
+
+(global-set-key (kbd "<f11>") 'load-windows-dispos)
+
+;; 将一个窗口锁定，永远显示
+(define-minor-mode locked-buffer-mode
+  "Make the current window always display this buffer."
+  :lighter " Locked"
+  (set-window-dedicated-p (selected-window) locked-buffer-mode))
+
+(global-set-key (kbd "<f12>") 'locked-buffer-mode)
+
 
 (provide 'config-interface)

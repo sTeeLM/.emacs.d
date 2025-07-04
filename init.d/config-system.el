@@ -155,5 +155,7 @@
           (pop-to-buffer-same-window (format "*%s*" buffer-name))))
     (error "term is not present or not loaded on this version of Emacs")))
 
+;; custom-file，不要把custom-set-variables胡乱写到我的配置文件里
+(setq custom-file "~/.emacs.d/custom-file.el")
 
 (provide 'config-system)

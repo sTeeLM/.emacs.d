@@ -9,6 +9,7 @@
 (require 'mew)
 (require 'mew-mbox-msg)
 (require 'mew-mbox-proto)
+(require 'mew-mbox-buffer)
 
 (defcustom mew-mbox-imap-checker-proc "imapcheck"
   "*imap checker程序名."
@@ -20,13 +21,8 @@
   :group 'mew-env
   :type 'integer)
 
-(defcustom mew-mbox-imap-checker-interval 10
+(defcustom mew-mbox-imap-checker-interval 300
   "两轮imap checker扫描的时间间隔（秒）"
-  :group 'mew-env
-  :type 'integer)
-
-(defcustom mew-mbox-imap-save-interval 10
-  "保存imap cache的间隔：每udpate n次"
   :group 'mew-env
   :type 'integer)
 
@@ -34,130 +30,170 @@
 (defconst mew-mbox-imap-process-name "mew-mbox-imap-checker")
 (defconst mew-mbox-imap-checker-prefix "mew-mbox-imap-checker-")
 
-;; 内部数据结构
-(defvar mew-mbox-imap-mbox-alist nil
-  "MSGID|MESSAGES|RECENT|UIDNEXT|UIDVALIDITY|UNSEEN"
+;; 元数据格式：
+;;((mbox-name . [TIMESTAMP MSGID MESSAGES RECENT UIDNEXT UIDVALIDITY UNSEEN]) ... )
+(defun mew-mbox-imap-alist-load (case)
+  "装载mbox元数据，返回alist 或者 nil"
+  nil)
+
+(defun mew-mbox-imap-alist-save (case alist)
+  "保存mbox元数据"
+  nil)
+
+(defun mew-mbox-imap-alist-export(alist)
+  "export mbox的元数据到list的entry数据"
   )
 
-(defvar mew-mbox-imap-checker-list nil
-  "checker进程列表")
+(defun mew-mbox-imap-alist-set(alist mbox key value)
+  "设置alist中邮箱mbox的元数据，注意该函数调用前需要加锁"
+  (when alist
+    (let ((data (alist-get key alist nil 'remove 'string=)) )
+      (if data
+        (cond
+         ((eq key 'TIMESTAMP) (aref data 0 value))
+         ((eq key 'MSGID) (aset data 1 value))
+         ((eq key 'MESSAGES) (aset data 2 value))
+         ((eq key 'RECENT) (aset data 3 value))
+         ((eq key 'UIDNEXT) (aset data 4 value))
+         ((eq key 'UIDVALIDITY) (aset data 5 value))
+         ((eq key 'UNSEEN) (aset data 6 value))
+         (t (mew-mbox-msg "set: unknown key %s" key)))
+        (mew-mbox-msg "set: mbox %s not found" mbox)
+        ))))
 
-(defvar mew-mbox-imap-update-count 0
-  "已经update的邮箱数目")
+(defun mew-mbox-imap-alist-get(alist mbox key)
+  "读取alist中邮箱mbox的元数据，注意该函数调用前需要加锁"
+  (if alist
+    (let ((data  (alist-get key alist nil 'remove 'string=)) )
+      (if data
+        (cond
+         ((eq key 'TIMESTAMP) (aref data 0))
+         ((eq key 'MSGID) (aref data 1))
+         ((eq key 'MESSAGES) (aref data 2))
+         ((eq key 'RECENT) (aref data 3))
+         ((eq key 'UIDNEXT) (aref data 4))
+         ((eq key 'UIDVALIDITY) (aref data 5))
+         ((eq key 'UNSEEN) (aref data 6))
+         (t (progn (mew-mbox-msg "get: unknown key %s" key) nil)))
+        (progn 
+          (mew-mbox-msg "get: mbox %s not found" mbox)
+          nil)
+        ))
+    nil))
 
+(defun mew-mbox-imap-alist-has-mbox (alist mbox)
+  "判断mbox是否在alist中"
+  (if (alist-get mbox alist nil 'remove 'string=) t nil))
 
-(defvar mew-mbox-imap-current-mbox-index 0
-  "当前mbox index")
+(defun mew-mbox-imap-alist-merge (alist-old alist-new)
+  "合并两个alist数据，以alist-new为骨架，\
+将alist-old中的元数据复制到alist-new中，如果\
+alist-old的mbox条目在alist-new中没有，则丢弃"
+  (dolist (el alist-new)
+    (if (mew-mbox-imap-has-mbox alist-old (car el))
+      (setf (alist-get (car el) alist-new nil 'remove 'string=)
+            (alist-get (car el) alist-old nil 'remove 'string=))
+      (mew-mbox-msg "merge: drop %s" (car el))))
+  alist-new)
 
-(defvar mew-mbox-imap-timer nil)
+(defun mew-mbox-imap-update-func (buffer)
+  "元数据定时更新函数，触发一个更新进程组"
+  (mew-mbox-start-upgrade-process-group buffer))
 
+(defun mew-mbox-imap-kill-update-process-group (buffer)
+  "杀死更新进程（组）"
+  (mew-mbox-msg "mew-mbox-imap-kill-update-process called with %s" buffer)
+  )
 
-;; timer 函数
-(defun mew-mbox-imap-timer-func ()
-  (mew-mbox-msg "mew-mbox-imap-timer-func called"))
+(defun mew-mbox-start-upgrade-process-group (buffer)
+  "启动一个更新进程组"
 
-;; 设置Timer，各种初始化
-(defun mew-mbox-imap-init ()
-  (mew-mbox-msg "mew-mbox-imap-init called"))
-;; (setq mew-mbox-imap-timer
-;;       (run-with-idle-timer
-;;        mew-mbox-imap-checker-interval t 'mew-mbox-imap-timer-func))
-;; nil)
+(defun mew-mbox-start-upgrade-process (buffer mbox)
+  "启动一个更新进程"
+  )
+
+;; 我们会向buffer附加一系列元数据
+;; update-timer: 定时器，定时启动一个批量更新的进程组
+;; mbox-alist: mbox的元数据
+;; alist-mutex: 保护alist-mutex的mutex
+;; process-alist: 更新进程组，每一个元素是(process . mbox-index)
+;; process-mutex: 保护更新进程组的mutex
+(defun mew-mbox-imap-init (buffer)
+  "初始化函数，为buffer添加mbox的alist，以及更新alist的定时器update-timer"
+  (mew-mbox-msg "mew-mbox-imap-init called %s" buffer)
+  (let ((case (mew-mbox-buffer-get-property buffer 'case))
+        (proto (mew-mbox-buffer-get-property buffer 'proto)))
+    (mew-mbox-buffer-set-property buffer 'mbox-alist (mew-mbox-imap-alist-load case))
+    (mew-mbox-buffer-set-property buffer
+                                  'alist-mutex (make-mutex (format "alist-mutex-%s:%s" case proto)))
+    (mew-mbox-buffer-set-property buffer
+                                  'process-mutex (make-mutex (format "proc-mutex-%s:%s" case proto)))
+    (mew-mbox-buffer-set-property buffer
+                                  'process-alist nil)
+    (mew-mbox-buffer-set-property buffer
+                                  'update-timer
+                                  (run-with-idle-timer
+                                   mew-mbox-imap-update-interval t 'mew-mbox-imap-update-func buffer))
+    ))
 
 ;; 删除timer，杀死所有checker进程
-(defun mew-mbox-imap-quit ()
-  (mew-mbox-msg "mew-mbox-imap-quit called"))
-;; (mew-mbox-imap-save-mbox-alist)
-;; (when mew-mbox-imap-timer
-;;   (progn
-;;     (cancel-timer mew-mbox-imap-timer)
-;;     (setq mew-mbox-imap-timer nil)))
-;; (dolist (proc-name mew-mbox-imap-checker-list)
-;;   (delete-process proc-name))
-;; (setq mew-mbox-imap-checker-list nil)
-;; (setq mew-mbox-imap-mbox-alist nil)
-;; (setq mew-mbox-imap-current-mbox-index 0)
-;; nil)
+(defun mew-mbox-imap-quit (buffer)
+  "杀死timer和所有更新线程，进程，保存元数据"
+  (mew-mbox-msg "mew-mbox-imap-quit called %s buffer")
+  (let* ((case (mew-mbox-buffer-get-property buffer 'case))
+         (alist (mew-mbox-buffer-get-property buffer 'mbox-alist))
+         (timer (mew-mbox-buffer-get-property buffer 'update-timer)))
+    (cancel-timer timer)
+    (mew-mbox-imap-kill-update-process-group buffer)
+    (mew-mbox-imap-alist-save case alist)))
 
-(defun mew-mbox-imap-update-mbox-count (case mbox &optional override-max)
-  (mew-mbox-msg "mew-mbox-imap-update-mbox-count called with (%s %s %s)"
-                case mbox override-max))
-;; (if (and case mbox)
-;;     (mew-mail-sum-imap-update-mbox case mbox override-max)
-;;   (let (case mbox)
-;;     (dolist (case mew-mail-sum-imap-mbox-alist)
-;;       (dolist (mbox (cdr case))
-;;         (mew-mail-sum-imap-update-mbox (car case) (car mbox) override-max))))))
+(defun mew-mbox-imap-update-mbox-count (buffer mbox)
+  "启动一个更新进程，更新特定mbox条目的元数据"
+  (mew-mbox-msg "mew-mbox-imap-update-mbox-count called with (%s %s)" buffer mbox)
+  (mew-mbox-start-upgrade-process buffer mbox))
 
-(defun mew-mbox-imap-update-all ()
-  (mew-mbox-msg "mew-mbox-imap-update-all called"))
+(defun mew-mbox-imap-update-all (buffer)
+  "启动一个更新进程组，更新所有元数据"
+  (mew-mbox-msg "mew-mbox-imap-update-all called")
+  (mew-mbox-start-upgrade-process-group buffer))
 
-;; 如果切换summary，则自动加入一个更新请求
-(defun mew-mbox-imap-ls-no-scan (case mbox)
-  (mew-mbox-msg "mew-mbox-imap-ls-no-scan called with (%s %s)" case mbox))
-;; (if (null case)
-;;     (setq case "default"))
-;; (mew-mail-sum-msg "mew-mail-sum-imap-ls-no-scan called %s %s" case mbox)
-;; (mew-mail-sum-imap-update-mbox-count case mbox t)
-;; )
+(defun mew-mbox-imap-generate-entries (buffer no-zero-na)
+  "从元数据中产生entries并返回"
+  (mew-mbox-msg "mew-mbox-imap-generate-entries called with (%s %s)" buffer no-zero-na)
+  (let ((entries)
+        (mutex (mew-mbox-buffer-get-property buffer 'alist-mutex))
+        (alist (mew-mbox-buffer-get-property buffer 'mbox-alist)))
+    (with-mutex mutex
+      (setq entries (mew-mbox-imap-export-mbox-alist
+                     (mew-mbox-buffer-get-property buffer 'mbox-alist))
+      ))
+    entries)))
 
-(defun mew-mbox-imap-generate-entries (case no-zero-na)
-  (mew-mbox-msg "mew-mbox-imap-generate-entries called with (%s %s)" case no-zero-na)
-  (let ((entries))
-    (push (list 0 (vector "*" "%" "TIME" "100" "default" "mbox0")) entries)
-    (push (list 1 (vector "*" "%" "TIME" "99" "default" "mbox1")) entries)
-    entries))
-  
-
-;; 获取msgid
-;; (defun mew-mbox-imap-load-msgid (case mbox)
-;;   (mew-mail-sum-msg "mew-mail-sum-imap-load-msgid called %s %s" case mbox)    
-;;   (let* ((case:mbox (concat case ":" mbox))
-;;          (msgid-file (mew-expand-file case:mbox mew-imap-msgid-file))
-;;          (msgid 0))
-;;     (condition-case err
-;;         (if (file-exists-p msgid-file)
-;;             (setq msgid (string-to-number (mew-lisp-load msgid-file)))
-;;           (progn
-;;             (mew-mail-sum-msg "load msgid file %s error : not exist" msgid-file)
-;;             0))
-;;       (error (progn (mew-mail-sum-msg
-;;                      "load msgid file %s for %s %s error %s"
-;;                      msgid-file case mbox (error-message-string err) ) 0))))
-;;   )
 
 ;; 启动mew时会调用：mew-init-p ＝nil
 ;; Z 时会调用：mew-init-p ＝t  
-(defun mew-mbox-imap-status-update ()
-  (mew-mbox-msg "mew-mbox-imap-status-update called with (%s)" mew-init-p))
-;; (let (tmp-alist)
-;;   (mew-mail-sum-imap-cache-passwd)
-;;   (if (not mew-init-p)
-;;       ; mew启动时,只需要装载cache
-;;       (progn 
-;;         (mew-mail-sum-msg "mew-mail-sum-imap-status-update called at init")
-;;         (mew-mail-sum-imap-load-mbox-alist)
-;;         (if (not mew-mail-sum-imap-mbox-alist)
-;;             (setq mew-mail-sum-imap-mbox-alist
-;;                   (mew-mail-sum-imap-rebuild-mbox-alist)))
-;;         (mew-mail-sum-imap-save-mbox-alist))
-;;     ; Z 后，配置可能有更新需要merge配置
-;;     (progn
-;;       (mew-mail-sum-msg "mew-mail-sum-imap-status-update called after init")        
-;;       (setq tmp-alist (mew-mail-sum-imap-rebuild-mbox-alist))
-;;       (mew-mail-sum-imap-merge-mbox-alist tmp-alist)
-;;       (mew-mail-sum-imap-save-mbox-alist)
-;;       )
-;;     )))
+(defun mew-mbox-imap-status-update (buffer init)
+  "Mew启动后会调用该函数，init为nil时，什么都不用做; init为t时\
+表示Mew重新从服务器读取了邮箱列表，我们需要更新元数据"
+  (mew-mbox-msg "mew-mbox-imap-status-update called with (%s)" init)
+  (when (and init buffer)
+    (let* ((case (mew-mbox-buffer-get-property buffer 'case))
+           (new-alist (mew-mbox-imap-alist-load case))
+           (old-alist (mew-mbox-buffer-get-property buffer 'mbox-alist))
+           (mutex (mew-mbox-buffer-get-property buffer 'alist-mutex)))
+      (with-mutex mutex
+        (setq new-alist
+              (mew-mbox-imap-alist-merge old-alist new-alist))
+        (mew-mbox-buffer-set-property buffer 'mbox-alist new-alist)
+        (mew-mbox-imap-alist-save case new-alist)))))
 
 (mew-mbox-register-proto 'imap
-                            'mew-mbox-imap-init
-                            'mew-mbox-imap-quit
-                            'mew-mbox-imap-status-update
-                            'mew-mbox-imap-ls-no-scan
-                            'mew-mbox-imap-update-mbox
-                            'mew-mbox-imap-update-all
-                            'mew-mbox-imap-generate-entries)
+                         'mew-mbox-imap-init
+                         'mew-mbox-imap-quit
+                         'mew-mbox-imap-status-update
+                         'mew-mbox-imap-update-mbox
+                         'mew-mbox-imap-update-all
+                         'mew-mbox-imap-generate-entries)
 
 
 ;; 重新构建mailbox列表
@@ -188,57 +224,6 @@
 ;;     ret-alist
 ;;     )
 ;;   )
-
-
-;; ;; 保存mailbox列表
-;; (defun mew-mail-sum-imap-save-mbox-alist ()
-;;   (mew-mail-sum-msg "mew-mail-sum-imap-save-mbox-alist called")
-;;   (condition-case err
-;;       (if mew-mail-sum-imap-mbox-alist
-;;           (mew-lisp-save
-;;            (concat mew-mail-path "/"
-;;                    mew-mail-sum-imap-cache-file)
-;;            mew-mail-sum-imap-mbox-alist 'nobackup 'unlimit))
-;;     (error (progn (mew-mail-sum-msg
-;;                    "save mbox alist error %s"
-;;                    (error-message-string err))
-;;                   (setq mew-mail-sum-imap-mbox-alist nil)))))
-
-
-;; ;; 装载已有mailbox列表
-;; (defun mew-mail-sum-imap-load-mbox-alist ()
-;;   (mew-mail-sum-msg "mew-mail-sum-imap-load-mbox-alist called")
-;;   (condition-case err
-;;       (setq mew-mail-sum-imap-mbox-alist
-;;             (mew-lisp-load
-;;              (concat mew-mail-path "/"
-;;                      mew-mail-sum-imap-cache-file)))
-;;     (error (progn (mew-mail-sum-msg
-;;                    "load mbox alist error %s"
-;;                    (error-message-string err))
-;;                   (setq mew-mail-sum-imap-mbox-alist nil)
-;;                   ))))
-
-;; ;; 以alist为模版，将老mew-mail-sum-imap-mbox-alist数据合并mailbox列表中，并更新mew-mail-sum-imap-mbox-alist
-;; (defun mew-mail-sum-imap-merge-mbox-alist (alist)
-;;   (mew-mail-sum-msg "mew-mail-sum-imap-merge-mbox-alist called")
-;;   (dolist (case-to alist)
-;;     (dolist (mbox-to (cdr case-to))
-;;       (let* ((val-to (cdr mbox-to))
-;;              (mbox-name-to (car mbox-to))
-;;              (time-stamp-to (nth-value 0 val-to))
-;;              (data-to (nth-value 1 val-to))
-;;              (mbox-from (assoc mbox-name-to (assoc (car case-to) mew-mail-sum-imap-mbox-alist)))
-;;              )
-;;         (if mbox-from
-;;             (let* ((val-from (cdr mbox-from))
-;;                    (time-stamp-from (nth-value 0 val-from))
-;;                    (data-from (nth-value 1 val-from)))
-;;               (mew-mail-sum-msg "merge %s:%s" (car case-to) (car mbox-to))
-;;               (setf (cdr time-stamp-to) (cdr time-stamp-from))
-;;               (setf (cdr data-to) (cdr data-from))
-;;               )))))
-;;     (setq mew-mail-sum-imap-mbox-alist alist))
 
 
 ;; 启动mew时会调用：mew-init-p ＝nil
