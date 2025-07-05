@@ -153,5 +153,4 @@
 
 (global-set-key (kbd "<f12>") 'locked-buffer-mode)
 
-
 (provide 'config-interface)
