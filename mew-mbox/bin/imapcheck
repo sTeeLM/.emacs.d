@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+import getopt, sys, imaplib, re, time
+
+def usage():
+    sys.stderr.write("usage:\n")
+    sys.stderr.write("  -h|--help: show help\n")
+    sys.stderr.write("  -m|--mbox: set mbox\n")
+    sys.stderr.write("  -u|--user: set user name\n")
+    sys.stderr.write("  -s|--server: set server\n")
+    sys.stderr.write("  -p|--port: set port\n")
+    sys.stderr.write("  -S|--ssl: use ssl\n")
+    sys.stderr.write("  -n|--delay: delay sec before quit\n")
+    sys.stderr.write("  -v|--verbose: verbose mode\n")
+
+def imap(user, passwd, mbox, server, port, ssl, verbose):
+    ret = False
+    count = 0
+    obj = 0
+    res = ''
+    content = ''
+    messages = 0
+    recent = 0
+    uidnext = 0
+    uidvalidity = 0
+    unseen = 0
+    try:
+        if ssl == 'yes' :
+            obj = imaplib.IMAP4_SSL(server,port)
+        else:
+            obj = imaplib.IMAP4(server,port)        
+        obj.login(user,passwd)
+        obj.select()
+        content = obj.status(mbox, "(MESSAGES RECENT UIDNEXT UIDVALIDITY UNSEEN)")
+#        print(content)
+        res = content[1][0].decode('utf8')
+        status = content[0]
+        if status == 'OK':
+            messages = re.search(r"MESSAGES (\d+)", res).group(1)
+            recent = re.search(r"RECENT (\d+)", res).group(1)
+            uidnext = re.search(r"UIDNEXT (\d+)", res).group(1)
+            uidvalidity = re.search(r"UIDVALIDITY (\d+)", res).group(1)
+            unseen = re.search(r"UNSEEN (\d+)", res).group(1)
+            ret = True
+    except Exception as err:
+        ret = False
+        if verbose:
+            sys.stderr.write(str(err) + "\n")
+    
+    return ret,messages,recent,uidnext,uidvalidity,unseen
+
+def main():
+    verbose = False
+    mbox    = ""
+    user    = ""
+    passwd  = ""
+    server  = ""
+    port    = ""
+    ssl     = "no"
+    delay   = 10
+    
+    passwd = sys.stdin.readline().strip()
+    
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hm:u:s:p:S:n:v",
+                                   ["help",
+                                    "mbox=",
+                                    "user=",
+                                    "server=",
+                                    "port=",
+                                    "ssl="
+                                    "delay="
+                                    "verbose"])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        sys.stderr.write(str(err) + "\n") # will print something like "option -a not recognized"
+        usage()
+        sys.exit(2)
+    for o, v in opts:
+        if o in ("-v", "--verbose"):
+            verbose = True
+        elif o in ("-h", "--help"):
+            usage()
+            sys.exit(1)
+        elif o in ("-m", "--mbox"):
+            mbox = v
+        elif o in ("-u", "--user"):
+            user = v
+        elif o in ("-s", "--server"):
+            server = v
+        elif o in ("-p", "--port"):
+            port = v
+        elif o in ("-S", "--ssl"):
+            ssl = v
+        elif o in ("-n", "--delay"):
+            delay = int(v)
+        else:
+            usage()
+            sys.exit(1)
+
+    if mbox == "" or user == "" or ssl == "" \
+       or passwd == "" or server == "" or  port == "":
+        usage()
+        sys.exit(1)
+
+    ret,messages,recent,uidnext,uidvalidity,unseen = imap(user, passwd, mbox, server, port, ssl, verbose)
+
+    if delay > 0:
+        time.sleep(delay)
+    
+    if ret:
+        sys.stdout.write ( "%s %s %s %s %s" % (messages,recent,uidnext,uidvalidity,unseen))
+        sys.stdout.flush()
+        sys.exit(0)
+    else:
+        sys.exit(1)
+        
+main()
