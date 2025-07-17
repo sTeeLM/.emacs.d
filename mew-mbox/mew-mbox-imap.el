@@ -72,13 +72,13 @@
               (setq mbox-list (mew-imap-folder-alist case))
               (dolist (mbox-list-slot mbox-list)
                 (let ((mbox (car mbox-list-slot)))
-                (when (mew-mbox-imap-filter-mbox mbox exclude-list)
-                  (setq alist (append alist (list (cons mbox
-                                                        (vector index nil nil nil nil nil nil nil nil)))))
-                  (setq index (1+ index))))))
+                  (when (mew-mbox-imap-filter-mbox mbox exclude-list)
+                    (setq alist (append alist (list (cons mbox
+                                                          (vector index nil nil nil nil nil nil nil nil)))))
+                    (setq index (1+ index))))))
           (progn
             (setq alist (mew-lisp-load mbox-alist-file-path))))
-      (error (message "mew-mbox-imap-alist-load failed %s" err)))
+      (error (message "mew-mbox-imap-alist-load failed %s" (error-message-string err))))
     alist))
 
 (defun mew-mbox-imap-alist-save (case alist)
@@ -88,7 +88,7 @@
          (mbox-alist-file-path (file-name-concat mbox-path mew-mbox-imap-cache-file)))
     (condition-case err
         (mew-lisp-save mbox-alist-file-path alist t t)
-      (error (message "mew-mbox-imap-alist-save failed %s" err)))))
+      (error (message "mew-mbox-imap-alist-save failed %s" (error-message-string err))))))
 
 (defun mew-mbox-imap-alist-mail-new (msgid messages uidnext)
   "计算有多少邮件是未读的"
@@ -110,8 +110,8 @@
   (if (assoc mbox plist) t nil))
 
 (defun mew-mbox-imap-filter-mbox (mbox filter)
-"匹配mbox和filter中每一个元素，如果匹配就返回nil，否则返回t"
-(not (reduce (lambda (&optional x y) (or x y)) (mapcar  (lambda (x) (string-match x mbox)) filter ))))
+  "匹配mbox和filter中每一个元素，如果匹配就返回nil，否则返回t"
+  (not (reduce (lambda (&optional x y) (or x y)) (mapcar  (lambda (x) (string-match x mbox)) filter ))))
 
 (defun mew-mbox-imap-alist-export(buffer case alist plist name-filter new-filter)
   "export mbox的元数据到list的entry数据"
@@ -357,7 +357,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
             (plist (mew-mbox-buffer-get-property buffer 'process-alist))
             (mbox-next) (process-slot))
         (mew-mbox-log-debug "[sentinel %s] '%s:%s' output '%s'"
-                      proc case mbox output)
+                            proc case mbox output)
         (cond
          ((or (eq proc-status 'run) (eq proc-status 'stop))
           ((mew-mbox-log-info "[checker %s:%s %s] still running or stopped, kill it" case mbox type))
@@ -422,7 +422,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
                                            "-n" delay)
                           (error (progn
                                    (mew-mbox-log-warn "can not start imap checker: %s"
-                                                 (error-message-string err)) nil))))
+                                                      (error-message-string err)) nil))))
           (when process
             (set-process-sentinel process 'mew-mbox-imap-checker-sentinel)
             (set-process-filter process 'mew-mbox-imap-checker-filter)
@@ -460,7 +460,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
           (setq msgid (string-to-number msgid-str)))
       (error
        (mew-mbox-log-warn "load msgid file %s for %s %s error %s"
-                     msgid-file case mbox (error-message-string err))))
+                          msgid-file case mbox (error-message-string err))))
     msgid))
 
 (defun mew-mbox-imap-get-message-count (case mbox)
@@ -476,7 +476,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
               (setq msg-count (1+ msg-count)))))
       (error
        (mew-mbox-log-warn "Load msg count dir %s for %s %s error %s"
-                     mbox-path case mbox (error-message-string err))))
+                          mbox-path case mbox (error-message-string err))))
     msg-count))
 
 ;; (MESSAGES RECENT UIDNEXT UIDVALIDITY UNSEEN) ->
@@ -520,14 +520,14 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
          (bnm (mew-imap-get-bnm pnm))
          (error (mew-imap-get-error pnm)))
     (mew-mbox-log-debug "before-mew-imap-sentinel: %s:%s %s %s" case bnm directive error)
-;;    ))
+    ;;    ))
     (unless error
       (when (and bnm (or (eq directive 'sync) (eq directive 'scan)))
         (let* ((proto (mew-mbox-fld-proto bnm))
-              (buffer (mew-mbox-buffer-find case proto)))
+               (buffer (mew-mbox-buffer-find case proto)))
           (when buffer
             (mew-mbox-start-upgrade-process buffer bnm)))))))
-          
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 以下是对外接口函数
 
