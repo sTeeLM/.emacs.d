@@ -5,6 +5,10 @@
   nil
   )
 
+(defun dmp-player-set-playlist (list)
+  "设置播放列表"
+  nil)
+
 (defun dmp-player-play (id)
   "播放特定乐曲"
   nil)

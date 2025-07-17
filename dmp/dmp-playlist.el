@@ -22,7 +22,7 @@
 
 (defun dmp-playlist-init()
   "初始化"
-  )
+  (setq dmp-playlist-mutex (make-mutex "dmp-playlist-mutex")))
 
 (defun dmp-playlist-load ()
   "从硬盘装载playlist元数据"
@@ -44,6 +44,9 @@
   "向列表中追加整个目录"
   nil)
 
+(defun dmp-playlist-remove-entries (entries)
+  "删除列表"
+  nil)
 
 
 (provide 'dmp-playlist)
