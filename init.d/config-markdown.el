@@ -111,10 +111,10 @@
   (set-face-attribute 'markdown-bold-face nil :foreground "cyan")
   (set-face-attribute 'bold nil :foreground "cyan")
   (turn-off-auto-fill)
-  (local-set-key (kbd "C-c C-d") 'insert-current-date)
-  (local-set-key (kbd "C-c i") 'markdown-insert-inline-image-from-file)
-  (local-set-key (kbd "C-c I") 'markdown-insert-clickable-inline-image-from-file)
-  (local-set-key (kbd "C-c f") 'markdown-insert-inline-link-from-file))
+  (local-set-key (kbd "C-c C-s d") 'insert-current-date)
+  (local-set-key (kbd "C-c C-s m") 'markdown-insert-inline-image-from-file)
+  (local-set-key (kbd "C-c C-s M") 'markdown-insert-clickable-inline-image-from-file)
+  (local-set-key (kbd "C-c C-s L") 'markdown-insert-inline-link-from-file))
 
 (add-hook 'markdown-mode-hook 'my-md-hook)
 

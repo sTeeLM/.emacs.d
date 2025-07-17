@@ -137,7 +137,11 @@
                                    ;;"U"
                                    (if (mew-mbox-imap-alist-is-updating mbox plist) "*" "")
                                    ;; MBOX
-                                   (if (= new-mail 0) mbox (propertize mbox 'face 'mew-mbox-new-mail-face))
+                                   (if (= new-mail 0)
+                                       (if (= 0 unseen)
+                                           mbox
+                                         (propertize mbox 'face 'mew-mbox-unseen-mail-face))
+                                     (propertize mbox 'face 'mew-mbox-new-mail-face))
                                    ;; "LAST-UPDATE"
                                    (if timestamp
                                        (format-time-string "%Y/%m/%d %H:%M:%S" timestamp)

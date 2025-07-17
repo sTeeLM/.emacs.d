@@ -50,8 +50,8 @@
 
 ;; 不用频繁输入密码
 (setq mew-use-cached-passwd t)
-(setq mew-passwd-timer-unit 3600) ;1小时
-(setq mew-passwd-lifetime 10) ; 10小时
+(setq mew-passwd-timer-unit (* 24 60)) ; 这个单位是分钟，1天
+(setq mew-passwd-lifetime 100) ; 100天
 (setq mew-passwd-reset-timer t)
 
 ;; 未读标记
@@ -108,9 +108,6 @@
 ;; 外观
 (setq mew-summary-form
       '(type "|" (27 remote-clock) "|" (27 local-clock) "|" (80 from) "|" t (0 subj)))
-;;      '(type (5 year) (6 date) (6 time) "|" (30 local-clock) "|" (80 from) "|" t (0 subj)))
-
-;;      
 
 
 (setq mew-sort-default-key "date")

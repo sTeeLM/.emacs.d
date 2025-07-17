@@ -75,6 +75,11 @@
   '((t (:inherit bold :foreground "cyan")))
   "新邮件使用的face")
 
+(defface mew-mbox-unseen-mail-face
+  '((t (:inherit bold :foreground "yellow")))
+  "unseen邮件使用的face")
+
+
 (defvar mew-mbox-saved-window-config nil
   "保存下来的window配置，用来快速跳回mbox列表")
 
@@ -90,6 +95,11 @@
 
 ;; 在summary模式下按G键打开邮箱列表
 (define-key mew-summary-mode-map "G"    'mew-mbox-open-buffer)
+
+;; 在summary模式下按C-c c sync邮箱
+(define-key mew-summary-mode-map (kbd "C-c C-c") 'mew-summary-sync)
+
+;; 在message模式下按q退出
 (define-key mew-message-mode-map "q"    'kill-buffer-and-window)
 
 (defun mew-mbox-buffers-revert ()
@@ -99,6 +109,23 @@
   (add-hook 'tabulated-list-revert-hook 'mew-mbox-buffers-revert nil t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun mew-summary-sync ()
+  "sync 本地邮箱和远程邮箱"
+  (interactive)
+  (mew-summary-only
+   (when (mew-summary-exclusive-p)
+     (let* ((bnm (mew-summary-folder-name 'ext))
+            (case (mew-sinfo-get-case))
+            (fld (mew-sinfo-get-folder)))
+       (mew-summary-folder-cache-load)
+ 	   (cond
+	    ((mew-folder-popp fld)
+	     (mew-pop-retrieve case 'sync bnm nil nil))
+	    ((mew-folder-imapp fld)
+	     (mew-imap-retrieve case 'sync bnm nil nil))
+	    ((mew-folder-nntpp fld)
+	     (mew-nntp-retrieve case 'sync bnm nil nil)))))))
 
 (defun mew-mbox-biff-fun-default (n)
   "默认的biff函数"
