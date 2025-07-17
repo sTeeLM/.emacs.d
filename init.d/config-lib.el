@@ -22,7 +22,8 @@
   "error log face")
 
 
-(define-derived-mode sm-log-mode fundamental-mode "sTeeL Log List" "日志buffer的major mode")
+(define-derived-mode sm-log-mode fundamental-mode "sTeeL Log List" "日志buffer的major mode"
+  (set (make-local-variable 'window-point-insertion-type) t))
 
 (defun sm-log-no-echo (level local-level name msg &optional buffer-name)
   (when (and (<= level local-level) (<= level sm-log-max-level))

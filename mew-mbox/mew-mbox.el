@@ -75,6 +75,11 @@
   '((t (:inherit bold :foreground "cyan")))
   "新邮件使用的face")
 
+(defface mew-mbox-unseen-mail-face
+  '((t (:inherit bold :foreground "yellow")))
+  "unseen邮件使用的face")
+
+
 (defvar mew-mbox-saved-window-config nil
   "保存下来的window配置，用来快速跳回mbox列表")
 

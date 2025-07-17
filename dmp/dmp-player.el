@@ -1,11 +1,16 @@
-;; DMP播放模块
+;; DMP播放器模块
 
-(defun dmp-player-set-plan (plan)
-  "设置播放计划"
+(defun dmp-player-init ()
+  "player初始化"
+  nil
+  )
+
+(defun dmp-player-play (id)
+  "播放特定乐曲"
   nil)
 
-(defun dmp-player-play-pause (&optional id)
-  "播放、暂停当前歌单或者曲目"
+(defun dmp-player-play-pause ()
+  "播放、暂停当前歌单"
   nil)
 
 (defun dmp-player-stop ()
