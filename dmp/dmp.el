@@ -4,7 +4,7 @@
 
 (require 'dmp-msg)
 (require 'dmp-player)
-(require 'dmp-playlist')
+(require 'dmp-playlist)
 (require 'dmp-info)
 
 (defconst dmp-buffer-name "*Music*")
@@ -193,7 +193,6 @@
   (interactive)
   (with-mutex dmp-table-entries-mutex
     (setq (mapcar 'dmp-table-trans-entry-*-uD-mark dmp-table-entries-alist))))
-)
 
 (defun dmp-table-mark-delete()
   " => D"
@@ -220,16 +219,16 @@
     (with-mutex dmp-table-entries-mutex
       (mapcar 'dmp-table-trans-entry-*-uP-mark dmp-table-entries-alist)
       (setq player-list (mapcar 'dmp-table-entry-filter-P-mark dmp-table-entries-alist)))
-    (dmp-player-set-playlist player-list)))
+    (dmp-player-set-playlist (mapcar 'car player-list))))
 
 (defun dmp-table-excute-delete ()
   "D => delete"
   (interactive)
   (let ((delete-list))
     (with-mutex 
-        (setq delete-list (mapcat 'dmp-table-entry-filter-D-mark dmp-table-entries-alist))
+        (setq delete-list (mapcar 'dmp-table-entry-filter-D-mark dmp-table-entries-alist))
       (setq dmp-table-entries-alist (mapcar 'dmp-table-entry-filter-uD-mark dmp-table-entries-alist)))
-    (dmp-playlist-remove-entries delete-list)))
+    (dmp-playlist-remove-entries (mapcar 'car delete-list))))
 
 
 ;;;;;;;;;;;;;私有函数
@@ -304,12 +303,11 @@
 
 (defun dmp-table-entry-filter-D-mark (entry)
   "如果某个条目有D mark 返回，否则返回nil"
-  nil)
+   (when (equal (aref (aref (cdr entry) 1 ) 2) ?D) entry))
 
 (defun dmp-table-entry-filter-uD-mark (entry)
   "如果某个条目没有D mark 返回，否则返回nil"
-  nil)
-
+   (unless (equal (aref (aref (cdr entry) 1 ) 2) ?D) entry))
 
 (defun dmp-table-reload()
   "重新从硬盘装载playlist，并刷新界面"
@@ -372,4 +370,4 @@
   (setq tabulated-list-entries dmp-table-entries-alist)
   (tabulated-list-init-header))
 
-(provide dmp')
+(provide 'dmp)
