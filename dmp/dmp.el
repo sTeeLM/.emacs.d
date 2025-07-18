@@ -24,9 +24,15 @@
 ;; genre : 类型
 ;; duration: 时长
 (defvar dmp-table-entries-alist nil
-  "table的元数据")
+  "界面元数据")
 
-(defvar dmp-table-entries-mutex nil)
+(defvar dmp-table-entries-mutex nil
+  "保护界面元数据的锁")
+
+;; 注意！！！
+;; 所有需要同时访问dmp-table-entries-alist和dmp-playlist-alist的操作
+;; 一定是先获得dmp-table-entries-mutex再获得dmp-playlist-mutex
+;; 否则可能会死锁！
 
 (defun dmp-buffers-revert () nil)
 
@@ -35,7 +41,7 @@
   (add-hook 'tabulated-list-revert-hook 'dmp-buffers-revert nil t)
   nil)
 
-(define-key dmp-table-mode-map  "p"  'dmp-table-play-pause)
+(define-key dmp-table-mode-map  (kbd "SPC") 'dmp-table-play-pause)
 (define-key dmp-table-mode-map  "s"  'dmp-table-stop)
 (define-key dmp-table-mode-map  "t"  'dmp-table-toggle-loop-style)
 (define-key dmp-table-mode-map  "+"  'dmp-table-volume-up)
@@ -43,6 +49,7 @@
 (define-key dmp-table-mode-map  ">"  'dmp-table-track-next)
 (define-key dmp-table-mode-map  "<"  'dmp-table-track-prev)
 (define-key dmp-table-mode-map  (kbd "RET") 'dmp-table-play-current)
+(define-key dmp-table-mode-map  "p"  'dmp-table-toggle-in-player)
 (define-key dmp-table-mode-map  "*"  'dmp-table-mark)
 (define-key dmp-table-mode-map  "u"  'dmp-table-unmark)
 (define-key dmp-table-mode-map  "U"  'dmp-table-unmark-all)
@@ -85,33 +92,27 @@
 (defun dmp-table-add-filelist(filelist)
   "从文件列表添加歌曲到playlist"
   (interactive "fselect playlist file: ")
-  (when (dmp-playlist-append-filelist filelist)
-    (with-mutex dmp-table-entries-mutex
-      (with-mutex dmp-playlist-mutex
-        (dmp-table-create-entries t))
-      (tabulated-list-print))
-    (dmp-info-start-batch)))
+  (with-mutex dmp-table-entries-mutex
+    (when (dmp-playlist-append-filelist filelist)
+      (dmp-table-recreate-entries t)))
+  (dmp-info-start-batch))
 
 (defun dmp-table-add-file(file)
   "从单个文件添加歌曲到playlist"
   (interactive "fselect media file: ")
-  (when (dmp-playlist-append-file filelist)
-    (with-mutex dmp-table-entries-mutex
-      (with-mutex dmp-playlist-mutex
-        (dmp-table-create-entries t))
-      (tabulated-list-print))
-    (dmp-info-start-batch)))
+  (with-mutex dmp-table-entries-mutex
+    (when (dmp-playlist-append-file file)
+      (dmp-table-create-entries t)))
+  (dmp-info-start-batch))
 
 
 (defun dmp-table-add-directory(directory)
   "从目录添加歌曲到playlist"
   (interactive "Dselect directory: ")
-  (when (dmp-playlist-append-directory directory)
-    (with-mutex dmp-table-entries-mutex
-      (with-mutex dmp-playlist-mutex
-        (dmp-table-create-entries t))
-      (tabulated-list-print))
-    (dmp-info-start-batch)))
+  (with-mutex dmp-table-entries-mutex
+    (when (dmp-playlist-append-directory directory)
+      (dmp-table-recreate-entries t)))
+  (dmp-info-start-batch))
 
 
 (defun dmp-table-play-pause ()
@@ -157,6 +158,18 @@
   (interactive)
   (dmp-player-track-prev))
 
+(defun dmp-table-toggle-in-player ()
+  "toggle是否在player中 P => ' ' or ' ' => P"
+  (interactive)
+  (let ((player-list)
+        (id (tabulated-list-get-id)))
+    (with-mutex dmp-table-entries-mutex
+      (dmp-table-toggle-entry-P-mark (assoc id dmp-table-entries-alist 'string=))
+      (tabulated-list-print t t)
+      (setq player-list (seq-filter 'dmp-table-entry-filter-P-mark dmp-table-entries-alist))
+      (dmp-playlist-set-P (mapcar 'car player-list)))
+    (dmp-player-set-playlist (mapcar 'car player-list))))
+
 (defun dmp-table-mark ()
   "设置标记 *"
   (interactive)
@@ -166,8 +179,6 @@
         (dmp-table-set-entry-*-mark (assoc id dmp-table-entries-alist 'string=))
         (tabulated-list-print t t)
         (next-line)))))
-
-
 
 (defun dmp-table-unmark ()
   "清除标记 * D"
@@ -197,14 +208,14 @@
 
 
 (defun dmp-table-mark-remove-delete ()
-  "* D => "
+  "* D => ' '"
   (interactive)
   (with-mutex dmp-table-entries-mutex
     (mapcar 'dmp-table-trans-entry-*-uD-mark dmp-table-entries-alist)
     (tabulated-list-print t t)))
 
 (defun dmp-table-mark-delete()
-  " => D"
+  "' ' => D"
   (interactive)
   (let ((id (tabulated-list-get-id)))
     (when id
@@ -220,18 +231,20 @@
     (with-mutex dmp-table-entries-mutex
       (mapcar 'dmp-table-trans-entry-*-P-mark dmp-table-entries-alist)
       (tabulated-list-print t t)
-      (setq player-list (mapcar 'dmp-table-entry-filter-P-mark dmp-table-entries-alist)))
+      (setq player-list (seq-filter 'dmp-table-entry-filter-P-mark dmp-table-entries-alist))
+      (dmp-playlist-set-P (mapcar 'car player-list)))
     (dmp-player-set-playlist (mapcar 'car player-list))))
 
 
 (defun dmp-table-mark-remove-player ()
-  "* P => "
+  "* P => ' '"
   (interactive)
   (let ((player-list))
     (with-mutex dmp-table-entries-mutex
       (mapcar 'dmp-table-trans-entry-*-uP-mark dmp-table-entries-alist)
       (tabulated-list-print t t)
-      (setq player-list (mapcar 'dmp-table-entry-filter-P-mark dmp-table-entries-alist)))
+      (setq player-list (seq-filter 'dmp-table-entry-filter-P-mark dmp-table-entries-alist))
+      (dmp-playlist-set-P (mapcar 'car player-list)))
     (dmp-player-set-playlist (mapcar 'car player-list))))
 
 (defun dmp-table-excute-delete ()
@@ -239,23 +252,18 @@
   (interactive)
   (let ((delete-list))
     (with-mutex dmp-table-entries-mutex
-      (with-mutex dmp-playlist-mutex
-        (setq delete-list (mapcar 'dmp-table-entry-filter-D-mark dmp-table-entries-alist))
-        (setq dmp-table-entries-alist (mapcar 'dmp-table-entry-filter-uD-mark dmp-table-entries-alist))
-        (tabulated-list-print t t)
-        (dmp-playlist-remove-entries (mapcar 'car delete-list))))))
+      (setq delete-list (seq-filter 'dmp-table-entry-filter-D-mark dmp-table-entries-alist))
+      (dmp-playlist-remove-entries (mapcar 'car delete-list))
+      (dmp-table-recreate-entries t))))
 
+(seq-filter 'dmp-table-entry-filter-D-mark dmp-table-entries-alist)
 
 ;;;;;;;;;;;;;私有函数
 
 (defun dmp-table-init()
   (setq dmp-table-entries-mutex (make-mutex "dmp-table-entries-mutex")))
 
-(defun dmp-table-refresh-entry(id)
-  "更新表格里对应的行"
- nil )
-
-;;;; mark: *|P|D|U
+;;;;;; mark: *|P|D|U
 (defun dmp-table-set-entry-*-mark (entry)
   "设置某一个条目的 * mark"
   (setf (aref (aref (cadr entry) 1 ) 0) ?* ))
@@ -279,6 +287,12 @@
 (defun dmp-table-clear-entry-P-mark (entry)
   "清除某一个条目的 P mark"
   (setf (aref (aref (cadr entry) 1 ) 1) ?  ))
+
+(defun dmp-table-toggle-entry-P-mark (entry)
+  "toggle 一个条目的 P mark"
+  (if (dmp-table-entry-filter-P-mark entry)
+      (dmp-table-clear-entry-P-mark entry)
+    (dmp-table-set-entry-P-mark entry)))
 
 (defun dmp-table-set-entry-U-mark (entry)
   "设置某一个条目的 U mark"
@@ -327,18 +341,17 @@
 (defun dmp-table-entry-filter-uD-mark (entry)
   "如果某个条目没有D mark 返回，否则返回nil"
    (unless (equal (aref (aref (cadr entry) 1 ) 2) ?D) entry))
+;;;;;;;;;;;;;;;
+
 
 (defun dmp-table-reload()
   "重新从硬盘装载playlist，并刷新界面"
   (dmp-player-stop)
   (dmp-info-cancel-all)
   (with-mutex dmp-table-entries-mutex
-    (with-mutex dmp-playlist-mutex
-      (when (dmp-playlist-load)
-        (dmp-table-create-entries)
-        (dmp-recreate-table)
-        (tabulated-list-print))))
-  (dmp-info-start-batch))
+    (when (dmp-playlist-load)
+      (dmp-table-recreate-table)
+      (dmp-table-recreate-entries))))
 
 (defun dmp-table-trans-playlist-entry (entry)
   "转换playlist的元数据到一条dmp-table的元数据"
@@ -357,9 +370,27 @@
         (duration (if info-valid (aref data 9) "???")))
     (list id (vector play-flag mark type title author album track year genre duration))))
 
-(defun dmp-table-create-entries (&optional merge)
-  "生成dmp-table-entries"
-  (setq dmp-table-entries-alist (mapcar 'dmp-table-trans-playlist-entry dmp-playlist-alist)))
+(defun dmp-table-merge-entries (new-entries)
+  "将dmp-table-entries-alist中的play-flag和mark merge到new-entries，忽略new-entries中没有的条目"
+  (mapcar (lambda (item)
+            (let ((entry)
+                  (data (cadr item)))
+              (setq entry (assoc (car item) dmp-table-entries-alist 'string=))
+              (when entry
+                (setf (aref data 0) (aref (cadr entry) 0))
+                (setf (aref data 1) (aref (cadr entry) 1))))
+            item)
+          new-entries))
+
+(defun dmp-table-recreate-entries (&optional merge)
+  "生成dmp-table-entries, 如果merge为非nil，保留旧dmp-table-entries-alist中的play-flag和mark"
+  (let ((new-entries))
+    (setq new-entries (mapcar 'dmp-table-trans-playlist-entry dmp-playlist-alist))
+    (if merge
+        (setq dmp-table-entries-alist (dmp-table-merge-entries new-entries))
+      (setq dmp-table-entries-alist new-entries))
+    (setq tabulated-list-entries dmp-table-entries-alist)
+    (tabulated-list-print t t)))
 
 (defun dmp-table-open-buffer ()
   "打开DMP的主界面"
@@ -370,17 +401,22 @@
     (unless buffer
       (setq buffer (generate-new-buffer buffer-name))
       (with-current-buffer buffer
-        (dmp-table-mode)
-        (dmp-table-init)
-        (dmp-playlist-init)
-        (dmp-info-init)
-        (dmp-player-init)
-        (dmp-table-reload)))
+        (let ((player-list))
+          (dmp-table-mode)
+          (dmp-table-init)
+          (dmp-playlist-init)
+          (dmp-info-init)
+          (dmp-player-init)
+          (dmp-table-reload)
+          (dmp-info-start-batch)
+          (with-mutex dmp-table-entries-mutex
+            (setq player-list (seq-filter 'dmp-table-entry-filter-P-mark dmp-table-entries-alist)))
+          (dmp-player-set-playlist (mapcar 'car player-list)))))
     (pop-to-buffer buffer)))
 
 
 
-(defun dmp-recreate-table ()
+(defun dmp-table-recreate-table ()
   "DMP界面定义"
   (setq tabulated-list-format
 	    (vector
@@ -406,7 +442,6 @@
          '("DURATION" 12 t :left-align t)
          ))
   (setq tabulated-list-use-header-line t)
-  (setq tabulated-list-entries dmp-table-entries-alist)
   (tabulated-list-init-header))
 
 (provide 'dmp)

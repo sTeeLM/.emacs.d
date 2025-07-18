@@ -7,7 +7,7 @@
 
 (defun dmp-player-set-playlist (list)
   "设置播放列表"
-  nil)
+  (dmp-log-debug "set new playlist %s" list))
 
 (defun dmp-player-play (id)
   "播放特定乐曲"

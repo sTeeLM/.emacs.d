@@ -17,8 +17,7 @@
   "核心元数据，整个播放列表")
 
 (defvar dmp-playlist-mutex nil
-  "对核心元数据的锁"
-  )
+  "对核心元数据的锁")
 
 (defvar dmp-lisp-max-length 2000
   "默认元数据最大长度")
@@ -39,7 +38,7 @@
             (setq dmp-playlist-alist (dmp-lisp-load dmp-playlist-filename))
             (setq ret t))
         (error (progn (dmp-log-error "dmp-playlist-load failed %s" (error-message-string err))))))))
-    
+
 
 (defun dmp-playlist-save ()
   "保存playlist元数据到硬盘"
@@ -48,6 +47,10 @@
         (dmp-lisp-save dmp-playlist-filename dmp-playlist-alist t t)
       (error (dmp-log-error "dmp-playlist-save failed %s" (error-message-string err))))))
 
+
+(defun dmp-playlist-append-files (files)
+  "向列表中追加多个文件"
+  nil)
 
 (defun dmp-playlist-append-filelist (filelist)
   "向列表中追加playlist"
@@ -63,17 +66,33 @@
 
 (defun dmp-playlist-remove-entries (entries)
   "删除列表"
-  nil)
+  (dmp-log-debug "dmp-playlist-remove-entries %s" entries)
+  (with-mutex dmp-playlist-mutex
+    (setq dmp-playlist-alist (seq-filter
+                              (lambda (item)
+                                (not (member (car item) entries)))
+                              dmp-playlist-alist))))
+
+(defun dmp-playlist-set-P (entries)
+  "将id在entries中的条目的P设置，不在的清除"
+  (dmp-log-debug "dmp-playlist-set-P %s" entries)
+  (with-mutex dmp-playlist-mutex
+    (mapcar (lambda (item)
+              (if (member (car item) entries)
+                  (setf (aref (cadr item) 0) t)
+                (setf (aref (cadr item) 0) nil)))
+            dmp-playlist-alist)))
+
 
 ;;;;;;;;;;;;;;私有函数
 
 (defmacro dmp-frwlet (read write &rest body)
   ;; (declare (indent 2))
   `(let ((coding-system-for-read  ,read)
-	 (coding-system-for-write ,write)
-	 (format-alist nil)
-	 (auto-image-file-mode nil)
-	 (jka-compr-inhibit t))
+	     (coding-system-for-write ,write)
+	     (format-alist nil)
+	     (auto-image-file-mode nil)
+	     (jka-compr-inhibit t))
      ,@body))
 (put 'dmp-frwlet 'lisp-indent-function 2)
 
@@ -84,20 +103,20 @@
   "Load lisp from FILENAME"
   (let ((fullname (expand-file-name filename)))
     (if (file-readable-p fullname)
-	(with-temp-buffer
-	  (dmp-frwlet 'utf-8-unix 'utf-8-unix
-	    (insert-file-contents fullname))
-	  (goto-char (point-min))
-	  (condition-case nil
-	      (read (current-buffer))
-	    (error ()))))))
+	    (with-temp-buffer
+	      (dmp-frwlet 'utf-8-unix 'utf-8-unix
+	        (insert-file-contents fullname))
+	      (goto-char (point-min))
+	      (condition-case nil
+	          (read (current-buffer))
+	        (error ()))))))
 
 (defun dmp-lisp-save (filename lisp &optional nobackup unlimit)
   "Save LISP to FILENAME. LISP is truncated to dmp-lisp-max-length
 by side-effect."
   (let* ((fullname (expand-file-name filename mew-conf-path))
-	 (backname (concat fullname ".BAK"))
-	 print-length print-level) ;; for Emacs 21
+	     (backname (concat fullname ".BAK"))
+	     print-length print-level) ;; for Emacs 21
     (when (file-writable-p fullname)
       (if nobackup
 	      (delete-file fullname)
@@ -111,7 +130,7 @@ by side-effect."
 	        (print lisp (current-buffer))
 	      (pp lisp (current-buffer)))
 	    (dmp-frwlet 'utf-8-unix 'utf-8-unix
-	  (write-region (point-min) (point-max) fullname nil 'no-msg))))))
+	      (write-region (point-min) (point-max) fullname nil 'no-msg))))))
 
 
 (provide 'dmp-playlist)
