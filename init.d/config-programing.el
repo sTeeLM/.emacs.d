@@ -1,5 +1,3 @@
-
-
 ;; 编程相关的所有配置
 
 ;; 将文件模式和文件后缀关联起来
@@ -14,7 +12,7 @@
 
 ;;自动补全括号
 ;;输入左边的括号，就会自动补全右边的部分.包括(), "", [] , {} , 等等。
-(defun my-mode-auto-pair ()
+(defun my-mode-auto-pair-setup ()
   (interactive)
   (make-local-variable 'skeleton-pair-alist)
   (message "my-mode-auto-pair run")  
@@ -33,52 +31,52 @@
   (local-set-key (kbd "\"") 'skeleton-pair-insert-maybe)
   (local-set-key (kbd "<") 'skeleton-pair-insert-maybe)
   )
-(add-hook 'c-mode-hook 'my-mode-auto-pair)
-(add-hook 'c++-mode-hook 'my-mode-auto-pair)
-(add-hook 'java-mode-hook 'my-mode-auto-pair)
-(add-hook 'python-mode-hook 'my-mode-auto-pair)
-(add-hook 'emacs-lisp-mode-hook 'my-mode-auto-pair)
+(add-hook 'c-mode-hook 'my-mode-auto-pair-setup)
+(add-hook 'c++-mode-hook 'my-mode-auto-pair-setup)
+(add-hook 'java-mode-hook 'my-mode-auto-pair-setup)
+(add-hook 'python-mode-hook 'my-mode-auto-pair-setup)
+(add-hook 'emacs-lisp-mode-hook 'my-mode-auto-pair-setup)
 
 ;;设置各种语言的编码风格
-(defun my-code-style ()
+
+(defun my-code-style-setup ()
   (message "my-code-style run")
-  (progn
-    (display-line-numbers-mode)
-    (line-number-mode)
-    (column-number-mode)
-    (whitespace-mode -1)
-    (setq c-default-style
-	      '((java-mode . "java")
-	        (awk-mode . "awk")
-	        (other . "linux")))
-    (c-set-style "linux")
-    (setq c-basic-offset 4)
-    (setq tab-width 4)
-    (indent-tabs-mode -1)
-    (turn-off-auto-fill)
-    (xclip-mode 1)
-    (setq backward-delete-char-untabify-method nil)))
-(add-hook 'c-mode-hook 'my-code-style)
-(add-hook 'c++-mode-hook 'my-code-style)
-(add-hook 'java-mode-hook 'my-code-style)
+  (display-line-numbers-mode)
+  (line-number-mode)
+  (column-number-mode)
+  (whitespace-mode -1)
+  (setq c-default-style
+	    '((java-mode . "java")
+	      (awk-mode . "awk")
+	      (other . "linux")))
+  (c-set-style "linux")
+  (setq c-basic-offset 4)
+  (setq tab-width 4)
+  (indent-tabs-mode -1)
+  (turn-off-auto-fill)
+  (xclip-mode 1)
+  (setq backward-delete-char-untabify-method nil))
+(add-hook 'c-mode-hook 'my-code-style-setup)
+(add-hook 'c++-mode-hook 'my-code-style-setup)
+(add-hook 'java-mode-hook 'my-code-style-setup)
 
-(defun my-elisp-code-style ()
+(defun my-elisp-code-style-setup ()
   (message "my-elist-code-style run")
-  (progn
-    (display-line-numbers-mode)
-    (line-number-mode)
-    (column-number-mode)
-    (whitespace-mode -1)
-    (setq c-basic-offset 4)
-    (setq tab-width 4)
-    (indent-tabs-mode -1)
-    (turn-off-auto-fill)
-    (xclip-mode 1)
-    (setq backward-delete-char-untabify-method nil)))
-(add-hook 'emacs-lisp-mode-hook 'my-elisp-code-style)
+  (display-line-numbers-mode)
+  (line-number-mode)
+  (column-number-mode)
+  (whitespace-mode -1)
+  (setq c-basic-offset 4)
+  (setq tab-width 4)
+  (indent-tabs-mode -1)
+  (turn-off-auto-fill)
+  (xclip-mode 1)
+  (auto-complete-mode 1)
+  (setq backward-delete-char-untabify-method nil))
+(add-hook 'emacs-lisp-mode-hook 'my-elisp-code-style-setup)
 
 
-(defun my-python-code-style ()
+(defun my-python-code-style-setup ()
   (message "my-python-code-style run")
   (progn
     (display-line-numbers-mode)
@@ -90,7 +88,7 @@
     (turn-off-auto-fill)
     (xclip-mode 1)
     (setq backward-delete-char-untabify-method nil)))
-(add-hook 'python-mode-hook 'my-python-code-style)
+(add-hook 'python-mode-hook 'my-python-code-style-setup)
 
 ;;设置M-g为goto-line
 (global-set-key (kbd "M-g") 'goto-line)
@@ -248,5 +246,43 @@
 
 ;;; magit: A Git Porcelain inside Emacs
 
+
+;;; auto-complete
+(require 'auto-complete)
+(require 'auto-complete-config)
+(require 'popup)
+(require 'fuzzy)
+
+;;(ac-config-default)
+(setq ac-use-menu-map t)
+(setq ac-use-fuzzy t)
+
+(defun my-auto-complete-elisp-setup ()
+  (auto-complete-mode 1)
+  (setq ac-sources '(ac-source-functions
+                     ac-source-symbols
+                     ac-source-variables
+                     ac-source-emacs-lisp-features
+                     ac-source-words-in-same-mode-buffers)))
+
+(defun my-auto-complete-c-setup ()
+  (require 'auto-complete-c-headers)
+  (auto-complete-mode 1)
+  (setq ac-sources '(ac-source-words-in-same-mode-buffers ac-source-c-headers)))
+
+(defun my-auto-complete-css-setup ()
+  (auto-complete-mode 1)
+  (setq ac-sources '(ac-source-words-in-same-mode-buffers ac-source-css-property)))
+
+(defun my-auto-complete-misc-setup ()
+  (auto-complete-mode 1)
+  (setq ac-sources '(ac-source-words-in-same-mode-buffers)))
+
+(add-hook 'c-mode-hook 'my-auto-complete-c-setup)
+(add-hook 'c++-mode-hook 'my-auto-complete-c-setup)
+(add-hook 'java-mode-hook 'my-auto-complete-misc-setup) 
+(add-hook 'python-mode-hook 'my-auto-complete-misc-setup)
+(add-hook 'css-mode-hook 'my-auto-complete-css-setup)
+(add-hook 'emacs-lisp-mode-hook 'my-auto-complete-elisp-setup)
 
 (provide 'config-programing)
