@@ -43,7 +43,7 @@
 (pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
 
 ;; 加载 bigdict 拼音词库。
-(add-to-list 'load-path "~/.emacs.d/pyim-bigdict")
+(add-to-list 'load-path "~/.emacs.d/plugin.d/pyim-bigdict")
 (require 'pyim-bigdict)
 (pyim-bigdict-enable)  ; 拼音词库，五笔用户 *不需要* 此行设置 
 

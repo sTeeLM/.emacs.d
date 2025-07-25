@@ -2,11 +2,11 @@
 (autoload 'mew "mew" nil t)
 (autoload 'mew-send "mew" nil t)
 
-(add-to-list 'load-path "~/.emacs.d/mew-mbox")
+(add-to-list 'load-path "~/.emacs.d/plugin.d/mew-mbox")
 (require 'mew-mbox)
 (setq mew-mbox-max-level 3)
 (setq mew-mbox-imap-update-interval 300) 
-(setq mew-mbox-imap-checker-proc "~/.emacs.d/mew-mbox/bin/imapcheck")
+(setq mew-mbox-imap-checker-proc "~/.emacs.d/plugin.d/mew-mbox/bin/imapcheck")
 
 ;; 这些可以用f键隐藏
 (setq mew-mbox-filter-regex-list ;;这几个mbox一般不需要看
@@ -24,7 +24,7 @@
 
 (defun play-new-mail-sound ()
   (make-process :name "play-new-mail-sound"
-                :command (list "/bin/sh" "-c" "afplay ~/.emacs.d/mew-mbox/etc/newmail.wav")))
+                :command (list "/bin/sh" "-c" "afplay ~/.emacs.d/plugin.d/mew-mbox/etc/newmail.wav")))
 
 (setq mew-mbox-biff-new-mail-sound-fun 'play-new-mail-sound)
 
@@ -45,8 +45,7 @@
       'mew-send-hook))
 
 ;; 下面的图标路径和安装路径有关，具体请看Mew的安装过程
-(setq mew-icon-directory "/opt/local/share/emacs/site-lisp/mew/etc")
-
+(setq mew-icon-directory (mew-which-mew-etc))
 
 ;; 不用频繁输入密码
 (setq mew-use-cached-passwd t)
