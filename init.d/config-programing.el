@@ -267,8 +267,18 @@
 
 (defun my-auto-complete-c-setup ()
   (require 'auto-complete-c-headers)
+  (require 'auto-complete-clang)
   (auto-complete-mode 1)
-  (setq ac-sources '(ac-source-words-in-same-mode-buffers ac-source-c-headers)))
+  (setq ac-sources '(ac-source-words-in-same-mode-buffers ac-source-c-headers ac-source-clang))
+  (setq ac-clang-flags (mapcar(lambda (item)(concat "-I" item))
+                              (split-string
+"/opt/local/include/gcc14/c++/
+/opt/local/include/gcc14/c++//aarch64-apple-darwin24
+/opt/local/include/gcc14/c++//backward
+/opt/local/lib/gcc14/gcc/aarch64-apple-darwin24/14.2.0/include
+/opt/local/lib/gcc14/gcc/aarch64-apple-darwin24/14.2.0/include-fixed
+/Library/Developer/CommandLineTools/SDKs/MacOSX15.sdk/usr/include
+/Library/Developer/CommandLineTools/SDKs/MacOSX15.sdk/System/Library/Frameworks"))))
 
 (defun my-auto-complete-css-setup ()
   (auto-complete-mode 1)
