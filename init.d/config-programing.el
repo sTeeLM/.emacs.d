@@ -272,6 +272,7 @@
   (setq ac-sources '(ac-source-words-in-same-mode-buffers ac-source-c-headers ac-source-clang))
   (setq ac-clang-flags (mapcar(lambda (item)(concat "-I" item))
                               (split-string
+;; echo "" | gcc -v -x c++ -E -
 "/opt/local/include/gcc14/c++/
 /opt/local/include/gcc14/c++//aarch64-apple-darwin24
 /opt/local/include/gcc14/c++//backward
