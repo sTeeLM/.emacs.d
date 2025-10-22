@@ -103,8 +103,8 @@
                             (mode . inferior-emacs-lisp-mode)))
                ("Calendar" (or                                  ; Or multiple!
                             (mode . calendar-mode)
-                            (mode . cfw:calendar-mode)
-                            (mode . cfw:details-mode)))
+                            (mode . calfw-calendar-mode)
+                            (mode . calfw-details-mode)))
                ("Diary"    (or
                             (filename . "index.md")
                             (filename . "index.html")))

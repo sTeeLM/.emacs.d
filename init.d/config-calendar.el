@@ -227,18 +227,18 @@ daylight好像有bug"
    )))
           
 
-(defun cfw:cal-view-diary ()
+(defun calfw-cal-view-diary ()
   "Show dairy on the selected date."
   (interactive)
   (let* ((cursor-date (calfw-cursor-to-nearest-date)))
     (my-diary-view-entry cursor-date)))
 
-(defun cfw:cal-clear-cache-refresh () 
+(defun calfw-cal-clear-cache-refresh () 
   "Clear cache and refresh all dairy source."
   (interactive )
   (let ((cp (calfw-cp-get-component)) (choice-list '(("all" 0))) (index 0) (name))
-    (cl-loop for s in (cfw:cp-get-contents-sources cp)
-          for f = (cfw:source-name s)
+    (cl-loop for s in (calfw-cp-get-contents-sources cp)
+          for f = (calfw-source-name s)
           if f do (push (list f index) choice-list))
     (setq name (completing-read "Select Cal to refresh: "
                                 choice-list nil t "all"))
@@ -246,13 +246,50 @@ daylight好像有bug"
       (setq name "*"))
     (message "will clear caches %s" name)
     (call-process-shell-command (format "rm -rf %s/%s.*" calfw-cal-ical-url-cache-base name) nil "*Cal-Messages*"))
-  (cfw:refresh-calendar-buffer nil))
-  
-;;(keymap-set cfw:calendar-mode-map "d" 'cfw:cal-view-diary)
-;;(keymap-set cfw:calendar-mode-map "R" 'cfw:cal-clear-cache-refresh)
+  (calfw-refresh-calendar-buffer nil))
 
-(keymap-set calfw-calendar-mode-map "d"  'cfw:cal-view-diary)
-(keymap-set calfw-calendar-mode-map "R"  'cfw:cal-clear-cache-refresh)
+;; 更新后 footer 上的日历从水平排列变成垂直排列了。。通override原来的函数，修改过来
+(defun calfw--render-footer (_width sources)
+  "Return a text of the footer.
+The footer is rendered based on the SOURCES."
+  (let* ((spaces (make-string 5 ? ))
+         (whole-text
+          (mapconcat
+           'identity
+           (cl-loop
+            with keymap = (progn
+                            (let ((kmap (make-sparse-keymap)))
+                              (define-key kmap [mouse-1] 'calfw-event-mouse-click-toggle-calendar)
+                              (define-key kmap [13] 'calfw-event-toggle-calendar)
+                              kmap))
+            for s in sources
+            for hidden-p = (calfw-source-hidden s)
+            for title = (calfw--tp (substring (calfw-source-name s) 0)
+                                   'cfw:source s)
+            for dot   = (calfw--tp (substring "(==)" 0) 'cfw:source s)
+            collect
+            (progn
+              (calfw--tp dot 'mouse-face 'highlight)
+              (propertize
+               (calfw--render-default-content-face
+                (concat
+                 "[" (calfw--rt dot
+                                (if hidden-p
+                                    'calfw-calendar-hidden-face
+                                  (calfw--render-get-face-period dot 'calfw-periods-face)))
+                 " " title "]")
+                (if hidden-p
+                    'calfw-calendar-hidden-face
+                  (calfw--render-get-face-content title
+                                                  'calfw-default-content-face)))
+               'keymap keymap)))
+           (concat " " spaces)))) ;就是这里，原来是(concat "\n" spaces)
+    (concat
+     spaces
+     whole-text)))
+
+(keymap-set calfw-calendar-mode-map "d"  'calfw-cal-view-diary)
+(keymap-set calfw-calendar-mode-map "R"  'calfw-cal-clear-cache-refresh)
 
 (defun cal ()
   (interactive)
