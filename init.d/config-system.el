@@ -1,4 +1,7 @@
-;设置打开文件的缺省路径
+;; 使用TCP server
+(setq server-use-tcp t)
+
+;;设置打开文件的缺省路径
 (setq default-directory "~/")
 
 ;;关闭烦人的出错时的提示声
