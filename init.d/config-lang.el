@@ -33,6 +33,10 @@
 ;; 输入法设置
 (require 'pyim)
 (require 'pyim-basedict) ; 拼音词库设置，五笔用户 *不需要* 此行设置
+(require 'pyim-cregexp-utils)
+(require 'pyim-cstring-utils)
+
+(setq pyim-cloudim 'baidu) ; 云输入法
 
 ;; 弹出式菜单
 (require 'popup)
