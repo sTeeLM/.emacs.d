@@ -35,8 +35,11 @@
 ;;vterm设置
 (require 'config-vterm)
 
-;;日历设置
+;;字典设置
 (require 'config-dictionary)
+
+;;阅读器
+(require 'config-spell)
 
 ;;Markdown设置
 (require 'config-markdown)

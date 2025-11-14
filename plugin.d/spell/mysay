@@ -1,0 +1,52 @@
+#!/opt/local/bin/python3
+
+import http.client
+import sys
+import os
+import urllib.parse
+
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, module="pygame")
+
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+import pygame
+
+from pkg_resources import resource_stream, resource_exists
+
+try:
+        conn = http.client.HTTPSConnection("dict.youdao.com", 443, timeout=10)
+        conn.request("GET", "/dictvoice?type=1&audio=%s" % urllib.parse.quote(sys.argv[1]))
+        r1 = conn.getresponse()
+except http.client.HTTPException:
+        sys.stdout.write('connect dict.youdao.com error!')
+        exit(1)
+
+if r1.status != 200:
+        sys.stdout.write('query dict.youdao.com error! %s %s' % (r1.status, r1.reason))
+        exit(1) 
+        
+with open('/tmp/mysay.mp3', 'wb') as f:
+        f.write(r1.read())
+
+pygame.init()
+pygame.mixer.init()
+
+pygame.mixer.music.load('/tmp/mysay.mp3')
+pygame.mixer.music.play()
+
+# Define a custom end event
+MUSIC_ENDED = pygame.USEREVENT + 1
+pygame.mixer.music.set_endevent(MUSIC_ENDED)
+
+waiting_for_music = True
+while waiting_for_music:
+    for event in pygame.event.get():
+        if event.type == MUSIC_ENDED:
+            sys.stdout.write("finished spell '%s'!" % sys.argv[1])
+            waiting_for_music = False
+        # Handle other events as needed
+        
+pygame.quit()
+
+exit(0)
