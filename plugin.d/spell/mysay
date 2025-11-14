@@ -26,15 +26,19 @@ if r1.status != 200:
         sys.stdout.write('query dict.youdao.com error! %s %s' % (r1.status, r1.reason))
         exit(1) 
         
-with open('/tmp/mysay.mp3', 'wb') as f:
+with open('/tmp/mysay', 'wb') as f:
         f.write(r1.read())
 
 pygame.init()
 pygame.mixer.init()
 
-pygame.mixer.music.load('/tmp/mysay.mp3')
-pygame.mixer.music.play()
-
+try:
+        pygame.mixer.music.load('/tmp/mysay')
+        pygame.mixer.music.play()
+except pygame.error:
+        sys.stdout.write('pygame.mixer play sound error!')
+        exit(1)
+        
 # Define a custom end event
 MUSIC_ENDED = pygame.USEREVENT + 1
 pygame.mixer.music.set_endevent(MUSIC_ENDED)
