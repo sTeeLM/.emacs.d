@@ -42,7 +42,8 @@
 (require 'popup)
 
 ;; 设置popup的背景
-(set-face-attribute 'pyim-page nil :background "cyan")
+(set-face-attribute 'pyim-page nil :background "orange" :foreground "black")
+
 ;; 加载 basedict 拼音词库。
 (pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
 

@@ -1,7 +1,7 @@
 ;; 界面配置
-(load-theme 'classic t)
-;;(load-theme 'blue-mood t)
-
+;;(load-theme 'classic t)
+(load-theme 'blue-mood t)
+;;(load-theme 'almost-mono-white t)
 ;;(set-scroll-bar-mode nil)
 ;;取消滚动栏
 

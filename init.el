@@ -8,6 +8,8 @@
       (message "server already running QUIT!")
       (save-buffers-kill-terminal)))
 
+(setq default-directory "~/")
+
 ;;库
 (require 'config-lib)
 

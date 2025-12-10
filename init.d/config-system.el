@@ -143,10 +143,10 @@
 (setq custom-file "~/.emacs.d/custom-file.el")
 
 ;; 在terminal模式下打开鼠标支持
-(add-hook 'after-make-frame-functions
-          (lambda (frame)
-            (unless (display-graphic-p frame)
-              (with-selected-frame frame
-                (xterm-mouse-mode)))))
+;;(add-hook 'after-make-frame-functions
+;;          (lambda (frame)
+;;            (unless (display-graphic-p frame)
+;;              (with-selected-frame frame
+;;                (xterm-mouse-mode)))))
 
 (provide 'config-system)

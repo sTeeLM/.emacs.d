@@ -13,7 +13,27 @@
 <div class=\"date\">%04d.%02d.%02d %s</div>\n\
 ------------------------------------------------\n\
 \n\
-## 大事记 ##\n" "skel content in newly created diary")
+## 1. 日常思考\n\
+  * 无\n\
+\n\
+## 2. 读书\n\
+  * 无\n\
+\n\
+## 3. 大事记\n\
+  * 无\n\
+\n\
+## 4. 日常新闻\n\
+\n\
+### 1. WSJ\n\
+\n\
+### 2. BBC\n\
+\n\
+### 3. Bloomberg\n\
+\n\
+### 4. Reuters\n\
+\n"
+
+"skel content in newly created diary")
 
 (define-error 'prepare-archive-error "can not prepare diary archive")
 
