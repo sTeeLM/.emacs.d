@@ -1,7 +1,8 @@
 ;; 界面配置
-;;(load-theme 'classic t)
-(load-theme 'blue-mood t)
+(load-theme 'classic t)
+;;(load-theme 'blue-mood t)
 ;;(load-theme 'almost-mono-white t)
+(load-theme 'standard-light-tinted t)
 ;;(set-scroll-bar-mode nil)
 ;;取消滚动栏
 
@@ -32,13 +33,13 @@
 
 
 ;; 设置另外一些颜色：语法高亮显示的背景和主题，区域选择的背景和主题，二次选择的背景和选择
-(set-face-foreground 'highlight "white")
-(set-face-background 'highlight "blue")
-(set-face-foreground 'region "cyan")
-(set-face-background 'region "blue")
-(set-face-foreground 'secondary-selection "skyblue")
-(set-face-background 'secondary-selection "darkblue")
-(set-face-background 'mode-line "cyan")
+;; (set-face-foreground 'highlight "white")
+;; (set-face-background 'highlight "blue")
+;; (set-face-foreground 'region "cyan")
+;; (set-face-background 'region "blue")
+;; (set-face-foreground 'secondary-selection "skyblue")
+;; (set-face-background 'secondary-selection "darkblue")
+;; (set-face-background 'mode-line "cyan")
 
 (display-time-mode 1);;启用时间显示设置，在minibuffer上面的那个杠上
 (setq display-time-24hr-format t);;时间使用24小时制
