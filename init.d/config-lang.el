@@ -36,7 +36,13 @@
 (require 'pyim-cregexp-utils)
 (require 'pyim-cstring-utils)
 
-(setq pyim-cloudim 'baidu) ; 云输入法
+;; 使用http proxy
+(setq url-proxy-services
+      '(("http" . "server.home.madcat.cc:8888")
+        ("https" . "server.home.madcat.cc:8888")
+        ("no_proxy" . "^\\(localhost\\|10\\..*\\|192\\.168\\..*\\)")))
+
+(setq pyim-cloudim 'google) ; 云输入法
 
 ;; 弹出式菜单
 (require 'popup)

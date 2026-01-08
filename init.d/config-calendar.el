@@ -24,13 +24,19 @@
 \n\
 ## 4. 日常新闻\n\
 \n\
-### 1. WSJ\n\
+### 1. 生词表\n\
 \n\
-### 2. BBC\n\
+| 生词 | 含义 |\n\
+|:-----|:-----|\n\
+|      |      |\n\
 \n\
-### 3. Bloomberg\n\
+### 2. WSJ\n\
 \n\
-### 4. Reuters\n\
+### 3. BBC\n\
+\n\
+### 4. Bloomberg\n\
+\n\
+### 5. Reuters\n\
 \n"
 
 "skel content in newly created diary")
