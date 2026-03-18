@@ -20,7 +20,7 @@
     (message "Will pronounce '%s'...." word)
     (cond 
      ((eq system-type 'darwin)
-      (setq output (get-process-output (format "%s '%s'" mysay-program word))))
+      (setq output (get-process-output (format "python3 -W ignore::UserWarning %s '%s'" mysay-program word))))
      (t (user-error (format "Unsupported OS: %s" system-type))))
     (message output)))
 
@@ -28,3 +28,5 @@
 
 
 (provide 'config-spell) 
+
+
