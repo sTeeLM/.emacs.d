@@ -1,4 +1,7 @@
-;设置打开文件的缺省路径
+;; 使用TCP server
+(setq server-use-tcp t)
+
+;;设置打开文件的缺省路径
 (setq default-directory "~/")
 
 ;;关闭烦人的出错时的提示声
@@ -138,5 +141,12 @@
 
 ;; custom-file，不要把custom-set-variables胡乱写到我的配置文件里
 (setq custom-file "~/.emacs.d/custom-file.el")
+
+;; 在terminal模式下打开鼠标支持
+;;(add-hook 'after-make-frame-functions
+;;          (lambda (frame)
+;;            (unless (display-graphic-p frame)
+;;              (with-selected-frame frame
+;;                (xterm-mouse-mode)))))
 
 (provide 'config-system)

@@ -3,7 +3,7 @@
 (require 'calfw-cal)
 (require 'calendar)
 (require 'icalendar)
-
+(require 'cl)
 
 ;; 在calendar上，按下d，直接显示markdown版本的日记
 
@@ -13,7 +13,32 @@
 <div class=\"date\">%04d.%02d.%02d %s</div>\n\
 ------------------------------------------------\n\
 \n\
-## 大事记 ##\n" "skel content in newly created diary")
+## 1. 综述\n\
+  * 无\n\
+\n\
+## 2. 笔记&思考\n\
+  * 无\n\
+\n\
+## 3. 日常新闻\n\
+\n\
+### 1. 生词表\n\
+\n\
+| 生词 | 含义 | 词性 | 例句 | \n\
+|:-----|:-----|:-----|:-----| \n\
+|      |      |      |      | \n\
+\n\
+### 2. WSJ\n\
+\n\
+### 3. BBC\n\
+\n\
+### 4. Bloomberg\n\
+\n\
+### 5. Reuters\n\
+\n\
+### 6. The Economist\n\
+\n"
+
+"skel content in newly created diary")
 
 (define-error 'prepare-archive-error "can not prepare diary archive")
 
@@ -149,15 +174,15 @@
 ;; 上，将ics文件转化为diary文件，让calfw-cal支持多数据源
 ;; 非常丑陋的改写。。
 
-(defcustom cfw:cal-ical-url-cache-base "~/.emacs.d/caldav-cache" "base dir of cache files")
-(defcustom cfw:cal-warn-prefix "CAL" "prefix of logging")
-(define-error 'cfw:download-error "URL download failed")
+(defcustom calfw-cal-ical-url-cache-base "~/.emacs.d/caldav-cache" "base dir of cache files")
+(defcustom calfw-cal-warn-prefix "CAL" "prefix of logging")
+(define-error 'calfw-download-error "URL download failed")
 
-(defun cfw:cal-test-ics-cache (dfile ics)
+(defun calfw-cal-test-ics-cache (dfile ics)
   (not (and (file-readable-p dfile) (file-readable-p ics)  (file-newer-than-file-p dfile ics))))
 
 
-(defun cfw:cal-download-url (url auth-user ics)
+(defun calfw-cal-download-url (url auth-user ics)
   (let ((passwd) (ret 0))
     (if auth-user
         (when (setq passwd (read-passwd (format "Please input password for %s@%s: " auth-user ics)))
@@ -165,9 +190,9 @@
       (setq ret (call-process "curl" nil "*Cal-Messages*" nil url "--compressed" "-o" (expand-file-name ics))))
     (message "curl ret %d" ret)
     (unless (equal ret 0)
-      (signal 'cfw:download-error ret))))
+      (signal 'calfw-download-error ret))))
 
-(defun cfw:cal-filter-daylight (buffer)
+(defun calfw-cal-filter-daylight (buffer)
   "remove BEGIN:DAYLIGHT xx END:DAYLIGHT out of buffer，\
 因为icalendar-import-buffer处理\
 daylight好像有bug"
@@ -182,7 +207,7 @@ daylight好像有bug"
       (message "filter out BEGIN:DAYLIGHT & END:DAYLIGHT from %s!!!" buffer)
       (save-buffer))))
 
-(defun cfw:cal-translate-ics (ics dfile)
+(defun calfw-cal-translate-ics (ics dfile)
   (save-current-buffer
       ;; now load and convert from the ical file
       (let ((buffer))
@@ -191,7 +216,7 @@ daylight好像有bug"
         (save-buffer (find-file dfile))
         (set-buffer (find-file ics))
         ;; filter BEGIN:DAYLIGHT xx END:DAYLIGHT OUT, some bug here?
-        (cfw:cal-filter-daylight (current-buffer))
+        (calfw-cal-filter-daylight (current-buffer))
         (icalendar-import-buffer dfile t nil)
         (setq buffer (get-file-buffer ics))
         (when buffer (kill-buffer buffer))
@@ -199,72 +224,112 @@ daylight好像有bug"
         (when (kill-buffer buffer))
       )))
 
-(defun cfw:cal-to-calendar (name url auth-user begin end)
-  (let ((diary-file (file-name-concat cfw:cal-ical-url-cache-base (format "%s.%s" name "diary")))
-        (ics-file (file-name-concat cfw:cal-ical-url-cache-base (format "%s.%s" name "ics"))))
+(defun calfw-cal-to-calendar (name url auth-user begin end)
+  (let ((diary-file (file-name-concat calfw-cal-ical-url-cache-base (format "%s.%s" name "diary")))
+        (ics-file (file-name-concat calfw-cal-ical-url-cache-base (format "%s.%s" name "ics"))))
     ;; if diary-file not exist, or older than ics, or ics not exist, read from url
-    (when (cfw:cal-test-ics-cache diary-file ics-file)
+    (when (calfw-cal-test-ics-cache diary-file ics-file)
       (condition-case err
           (progn
-            (cfw:cal-download-url url auth-user ics-file)
-            (cfw:cal-translate-ics ics-file diary-file))
+            (calfw-cal-download-url url auth-user ics-file)
+            (calfw-cal-translate-ics ics-file diary-file))
         (file-error
          (message "file error %s" err))
-        (cfw:download-error
+        (calfw-download-error
          (message "url download error %s" (cdr err)))))
       (if (file-readable-p diary-file)
-          (cfw:cal-schedule-period-to-calendar begin end)
-        (display-warning cfw:cal-warn-prefix (format "diary file %s not exist or readable" diary-file)))))
+          (calfw-cal--schedule-period-to-calendar begin end)
+        (display-warning calfw-cal-warn-prefix (format "diary file %s not exist or readable" diary-file)))))
 
-(defun cfw:cal-create-source-from-ical-url (name url &optional color auth-user)
+(defun calfw-cal-create-source-from-ical-url (name url &optional color auth-user)
   "Create diary calendar source."
  (lexical-let ((url url) (name name) (auth-user auth-user))
-  (make-cfw:source
+  (make-calfw-source
    :name (concat name)
    :color (or color "SaddleBrown")
    :data (lambda (begin end)
-           (cfw:cal-to-calendar name url auth-user begin end))
+           (calfw-cal-to-calendar name url auth-user begin end))
    )))
           
 
-(defun cfw:cal-view-diary ()
+(defun calfw-cal-view-diary ()
   "Show dairy on the selected date."
   (interactive)
-  (let* ((cursor-date (cfw:cursor-to-nearest-date)))
+  (let* ((cursor-date (calfw-cursor-to-nearest-date)))
     (my-diary-view-entry cursor-date)))
 
-(defun cfw:cal-clear-cache-refresh () 
+(defun calfw-cal-clear-cache-refresh () 
   "Clear cache and refresh all dairy source."
   (interactive )
-  (let ((cp (cfw:cp-get-component)) (choice-list '(("all" 0))) (index 0) (name))
-    (cl-loop for s in (cfw:cp-get-contents-sources cp)
-          for f = (cfw:source-name s)
+  (let ((cp (calfw-cp-get-component)) (choice-list '(("all" 0))) (index 0) (name))
+    (cl-loop for s in (calfw-cp-get-contents-sources cp)
+          for f = (calfw-source-name s)
           if f do (push (list f index) choice-list))
     (setq name (completing-read "Select Cal to refresh: "
                                 choice-list nil t "all"))
     (when (or (equal name "all") (equal name ""))
       (setq name "*"))
     (message "will clear caches %s" name)
-    (call-process-shell-command (format "rm -rf %s/%s.*" cfw:cal-ical-url-cache-base name) nil "*Cal-Messages*"))
-  (cfw:refresh-calendar-buffer nil))
-  
-(keymap-set cfw:calendar-mode-map "d" 'cfw:cal-view-diary)
-(keymap-set cfw:calendar-mode-map "R" 'cfw:cal-clear-cache-refresh)
+    (call-process-shell-command (format "rm -rf %s/%s.*" calfw-cal-ical-url-cache-base name) nil "*Cal-Messages*"))
+  (calfw-refresh-calendar-buffer nil))
+
+;; 更新后 footer 上的日历从水平排列变成垂直排列了。。通override原来的函数，修改过来
+(defun calfw--render-footer (_width sources)
+  "Return a text of the footer.
+The footer is rendered based on the SOURCES."
+  (let* ((spaces (make-string 5 ? ))
+         (whole-text
+          (mapconcat
+           'identity
+           (cl-loop
+            with keymap = (progn
+                            (let ((kmap (make-sparse-keymap)))
+                              (define-key kmap [mouse-1] 'calfw-event-mouse-click-toggle-calendar)
+                              (define-key kmap [13] 'calfw-event-toggle-calendar)
+                              kmap))
+            for s in sources
+            for hidden-p = (calfw-source-hidden s)
+            for title = (calfw--tp (substring (calfw-source-name s) 0)
+                                   'cfw:source s)
+            for dot   = (calfw--tp (substring "(==)" 0) 'cfw:source s)
+            collect
+            (progn
+              (calfw--tp dot 'mouse-face 'highlight)
+              (propertize
+               (calfw--render-default-content-face
+                (concat
+                 "[" (calfw--rt dot
+                                (if hidden-p
+                                    'calfw-calendar-hidden-face
+                                  (calfw--render-get-face-period dot 'calfw-periods-face)))
+                 " " title "]")
+                (if hidden-p
+                    'calfw-calendar-hidden-face
+                  (calfw--render-get-face-content title
+                                                  'calfw-default-content-face)))
+               'keymap keymap)))
+           (concat " " spaces)))) ;就是这里，原来是(concat "\n" spaces)
+    (concat
+     spaces
+     whole-text)))
+
+(keymap-set calfw-calendar-mode-map "d"  'calfw-cal-view-diary)
+(keymap-set calfw-calendar-mode-map "R"  'calfw-cal-clear-cache-refresh)
 
 (defun cal ()
   (interactive)
-  (cfw:open-calendar-buffer
+  (calfw-open-calendar-buffer
    :contents-sources
    (list
-    (cfw:cal-create-source-from-ical-url "纪念日" "https://ical.madcat.cc/calanders/michael/89098fa4-ef29-7b1e-3cbd-09bc0ec16477/" "#ff0000" "michael")
-    (cfw:cal-create-source-from-ical-url "旅行" "https://ical.madcat.cc/calanders/michael/4334dbe0-e104-cd7c-520c-9611ebff2e6e/" "#7D18F9" "michael")
-    (cfw:cal-create-source-from-ical-url "娃校内" "https://ical.madcat.cc/calanders/michael/ab40a81c-48a6-3b5d-c5b2-b2f0653fea35/" "#2DEFF8" "michael")
-    (cfw:cal-create-source-from-ical-url "娃校外" "https://ical.madcat.cc/calanders/michael/a47a0a99-a761-3126-e96b-f159ded1cf48/" "#7286DC" "michael")
-    (cfw:cal-create-source-from-ical-url "学习计划" "https://ical.madcat.cc/calanders/michael/7ceac6da-9d09-4f33-fbe4-9a0332ae8e13/" "#03D74C" "michael")
-    (cfw:cal-create-source-from-ical-url "医院" "https://ical.madcat.cc/calanders/michael/cbf482ec-b369-cdde-f982-ea984f45e49a/" "#FECC00" "michael")
-    (cfw:cal-create-source-from-ical-url "其他" "https://ical.madcat.cc/calanders/michael/044b81cb-7f8d-15b7-9127-48ef1353150b/" "#D07669" "michael")
-    (cfw:cal-create-source-from-ical-url "美国节日" "https://calendars.icloud.com/holidays/us_en-us.ics/" "#ff00ff")
-    (cfw:cal-create-source-from-ical-url "中国节日" "https://calendars.icloud.com/holidays/cn_zh.ics/" "#0000cc")
+    (calfw-cal-create-source-from-ical-url "纪念日" "https://ical.madcat.cc/calanders/michael/89098fa4-ef29-7b1e-3cbd-09bc0ec16477/" "#ff0000" "michael")
+    (calfw-cal-create-source-from-ical-url "旅行" "https://ical.madcat.cc/calanders/michael/4334dbe0-e104-cd7c-520c-9611ebff2e6e/" "#7D18F9" "michael")
+    (calfw-cal-create-source-from-ical-url "娃校内" "https://ical.madcat.cc/calanders/michael/ab40a81c-48a6-3b5d-c5b2-b2f0653fea35/" "#2DEFF8" "michael")
+    (calfw-cal-create-source-from-ical-url "娃校外" "https://ical.madcat.cc/calanders/michael/a47a0a99-a761-3126-e96b-f159ded1cf48/" "#7286DC" "michael")
+    (calfw-cal-create-source-from-ical-url "学习计划" "https://ical.madcat.cc/calanders/michael/7ceac6da-9d09-4f33-fbe4-9a0332ae8e13/" "#03D74C" "michael")
+    (calfw-cal-create-source-from-ical-url "医院" "https://ical.madcat.cc/calanders/michael/cbf482ec-b369-cdde-f982-ea984f45e49a/" "#FECC00" "michael")
+    (calfw-cal-create-source-from-ical-url "其他" "https://ical.madcat.cc/calanders/michael/044b81cb-7f8d-15b7-9127-48ef1353150b/" "#D07669" "michael")
+    (calfw-cal-create-source-from-ical-url "美国节日" "https://calendars.icloud.com/holidays/us_en-us.ics/" "#ff00ff")
+    (calfw-cal-create-source-from-ical-url "中国节日" "https://calendars.icloud.com/holidays/cn_zh.ics/" "#0000cc")
     )))
 
 ;; 进入emacs的时候，默认显示日历

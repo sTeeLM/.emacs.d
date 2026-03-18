@@ -33,12 +33,23 @@
 ;; 输入法设置
 (require 'pyim)
 (require 'pyim-basedict) ; 拼音词库设置，五笔用户 *不需要* 此行设置
+(require 'pyim-cregexp-utils)
+(require 'pyim-cstring-utils)
+
+;; 使用http proxy
+(setq url-proxy-services
+      '(("http" . "server.home.madcat.cc:8888")
+        ("https" . "server.home.madcat.cc:8888")
+        ("no_proxy" . "^\\(localhost\\|10\\..*\\|192\\.168\\..*\\)")))
+
+(setq pyim-cloudim 'google) ; 云输入法
 
 ;; 弹出式菜单
 (require 'popup)
 
 ;; 设置popup的背景
-(set-face-attribute 'pyim-page nil :background "cyan")
+(set-face-attribute 'pyim-page nil :background "#cf93a0" :foreground "black")
+
 ;; 加载 basedict 拼音词库。
 (pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
 
