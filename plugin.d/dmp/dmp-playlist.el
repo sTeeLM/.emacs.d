@@ -48,14 +48,6 @@
       (error (dmp-log-error "dmp-playlist-save failed %s" (error-message-string err))))))
 
 
-(defun dmp-playlist-append-files (files)
-  "向列表中追加多个文件"
-  nil)
-
-(defun dmp-playlist-append-filelist (filelist)
-  "向列表中追加playlist"
-  nil)
-
 (defun dmp-playlist-append-file (file)
   "向列表中追加单个文件"
   nil)

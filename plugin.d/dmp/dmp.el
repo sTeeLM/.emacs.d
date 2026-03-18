@@ -1,4 +1,4 @@
-;;o dummy 音乐播放器
+;; dummy 音乐播放器
 ;; 以一个m3u格式的文件为媒体库的
 ;; 及其简单的表格界面的音乐播放器
 
@@ -14,7 +14,7 @@
 ;; 以媒体文件的绝对路径为key的alist
 ;; (("abs-file-path" . [xxx]) .. .. )
 ;; play-flag :  "" or "=>"
-;; mark : *|P|D|U
+;; mark : *|P|D|U 标记|待播放|待删除|更新中
 ;; type  : 文件类型 MP3 WAV OGG
 ;; title : 歌曲标题
 ;; author: 歌曲作者
@@ -62,8 +62,8 @@
 (define-key dmp-table-mode-map  "g"  'dmp-table-refresh)
 (define-key dmp-table-mode-map  (kbd "C-x G") 'dmp-table-rebuild-all-info)
 (define-key dmp-table-mode-map  "G"  'dmp-table-rebuild-info)
-(define-key dmp-table-mode-map  "al"  'dmp-table-add-filelist)
 (define-key dmp-table-mode-map  "af"  'dmp-table-add-file)
+(define-key dmp-table-mode-map  "ad"  'dmp-table-add-directory)
 (define-key dmp-table-mode-map  (kbd "C-x S") 'dmp-table-save-playlist)
 
 (defun dmp-table-save-playlist ()
@@ -89,20 +89,12 @@
     (when id
       (dmp-info-start-oneshot id t))))
 
-(defun dmp-table-add-filelist(filelist)
-  "从文件列表添加歌曲到playlist"
-  (interactive "fselect playlist file: ")
-  (with-mutex dmp-table-entries-mutex
-    (when (dmp-playlist-append-filelist filelist)
-      (dmp-table-recreate-entries t)))
-  (dmp-info-start-batch))
-
 (defun dmp-table-add-file(file)
   "从单个文件添加歌曲到playlist"
   (interactive "fselect media file: ")
   (with-mutex dmp-table-entries-mutex
     (when (dmp-playlist-append-file file)
-      (dmp-table-create-entries t)))
+      (dmp-table-recreate-entries t)))
   (dmp-info-start-batch))
 
 
@@ -113,7 +105,6 @@
     (when (dmp-playlist-append-directory directory)
       (dmp-table-recreate-entries t)))
   (dmp-info-start-batch))
-
 
 (defun dmp-table-play-pause ()
   "播放/暂停当前歌单(P条目)"
