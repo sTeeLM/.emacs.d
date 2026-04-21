@@ -137,8 +137,8 @@
                                    ;;"U"
                                    (if (mew-mbox-imap-alist-is-updating mbox plist) "*" "")
                                    ;; MBOX
-                                   (if (= new-mail 0)
-                                       (if (= 0 unseen)
+                                   (if (or (not new-mail) (= new-mail 0))
+                                       (if (or (not unseen) (= 0 unseen))
                                            mbox
                                          (propertize mbox 'face 'mew-mbox-unseen-mail-face))
                                      (propertize mbox 'face 'mew-mbox-new-mail-face))
