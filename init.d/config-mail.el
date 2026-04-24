@@ -10,7 +10,7 @@
 
 ;; 这些可以用f键隐藏
 (setq mew-mbox-filter-regex-list ;;这几个mbox一般不需要看
-      '("^%Trash$" "^%Sent$" "^%Drafts$" "^%Junk$" "^%Archive$"))
+      '("^%Trash$" "^%Sent$" "^%Drafts$" "^%Junk$" "^%Archive$" "^%Notes" "^%queue"))
 (setq mew-mbox-filter-name-do t)
 (setq mew-mbox-filter-zero-do t)
 

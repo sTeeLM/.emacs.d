@@ -127,7 +127,9 @@
              (new-mail (mew-mbox-imap-alist-mail-new msgid r-messages uidnext)))
         ;; 累加biff-cnt
         (setq biff-cnt (+ biff-cnt new-mail))
-        (when (and (mew-mbox-imap-filter-mbox mbox name-filter) (or (not (equal new-mail 0)) (and new-filter (equal 0 new-mail))))
+        (when (and (mew-mbox-imap-filter-mbox mbox name-filter)
+                   (or (or (not (equal new-mail 0)) (and new-filter (equal 0 new-mail)))
+                       (or (not (equal unseen 0)) (and new-filter (equal 0 unseen)))))
           (setq entries (append entries
                                 (list
                                  (list
