@@ -433,7 +433,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
             (mew-mbox-imap-checker-set process "type" type)
             (process-send-string process (format "%s\n" passwd))))
       (if (not passwd)
-          (mew-mox-warn "mew-mbox: password is null, can not start process")
+          (mew-mbox-log-warn "mew-mbox: password is null, can not start process")
         (mew-mbox-log-warn "mew-mbox: %s is not excutable or exist, can not start process" proc-path)))
     (if process
         (progn
