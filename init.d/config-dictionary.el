@@ -3,7 +3,7 @@
 (require 'dictionary)
 
 ;; 查找本地服务器
-(setq dictionary-server "server.home.madcat.cc")
+(setq dictionary-server "server.madcat.cc")
 
 ;; C-c l 查找单词
 (global-set-key (kbd "C-c l") 'dictionary-lookup-definition)

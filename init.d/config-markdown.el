@@ -122,7 +122,7 @@
 
 ;; Markdown可以预览
 ;(custom-set-variables
-(setq markdown-command "pandoc -s -c /Users/michael/.emacs.d/plugin.d/pandoc/pandoc.css --metadata title=preview")
+(setq markdown-command "pandoc -s --mathjax -c /Users/michael/.emacs.d/plugin.d/pandoc/pandoc.css --metadata title=preview")
 
 
 (provide 'config-markdown)

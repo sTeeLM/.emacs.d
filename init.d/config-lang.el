@@ -31,57 +31,92 @@
 (prefer-coding-system 'utf-8)
 
 ;; 输入法设置
-(require 'pyim)
-(require 'pyim-basedict) ; 拼音词库设置，五笔用户 *不需要* 此行设置
-(require 'pyim-cregexp-utils)
-(require 'pyim-cstring-utils)
+
+;;---------------------------------PYIM----------------------------
+;;(require 'pyim)
+;;(require 'pyim-basedict) ; 拼音词库设置，五笔用户 *不需要* 此行设置
+;;(require 'pyim-cregexp-utils)
+;;(require 'pyim-cstring-utils)
 
 ;; 使用http proxy
-(setq url-proxy-services
-      '(("http" . "server.home.madcat.cc:8888")
-        ("https" . "server.home.madcat.cc:8888")
-        ("no_proxy" . "^\\(localhost\\|10\\..*\\|192\\.168\\..*\\)")))
+;;(setq url-proxy-services
+;;      '(("http" . "server.madcat.cc:8888")
+;;        ("https" . "server.madcat.cc:8888")
+;;        ("no_proxy" . "^\\(localhost\\|10\\..*\\|192\\.168\\..*\\)")))
 
-(setq pyim-cloudim 'google) ; 云输入法
+;;(setq pyim-cloudim 'google) ; 云输入法
 
 ;; 弹出式菜单
-(require 'popup)
+;;(require 'popup)
 
 ;; 设置popup的背景
-(set-face-attribute 'pyim-page nil :background "#cf93a0" :foreground "black")
+;;(set-face-attribute 'pyim-page nil :background "#cf93a0" :foreground "black")
 
 ;; 加载 basedict 拼音词库。
-(pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
+;;(pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
 
 ;; 加载 bigdict 拼音词库。
-(add-to-list 'load-path "~/.emacs.d/plugin.d/pyim-bigdict")
-(require 'pyim-bigdict)
-(pyim-bigdict-enable)  ; 拼音词库，五笔用户 *不需要* 此行设置 
+;;(add-to-list 'load-path "~/.emacs.d/plugin.d/pyim-bigdict")
+;;(require 'pyim-bigdict)
+;;(pyim-bigdict-enable)  ; 拼音词库，五笔用户 *不需要* 此行设置 
 
 
 ;; 将 Emacs 默认输入法设置为 pyim.
-(setq default-input-method "pyim")
+;;(setq default-input-method "pyim")
 
 ;; 设置 pyim 默认使用的输入法策略，我使用全拼。
-(pyim-default-scheme 'quanpin)
+;;(pyim-default-scheme 'quanpin)
 ;; (pyim-default-scheme 'wubi)
 ;; (pyim-default-scheme 'cangjie)
 
 ;; 显示 9 个候选词。
-(setq pyim-page-length 9)
+;;(setq pyim-page-length 9)
 
 ;; 开启代码搜索中文功能（比如拼音，五笔码等）
-(pyim-isearch-mode 1)
+;;(pyim-isearch-mode 1)
 
 ;; 金手指设置，可以将光标处的编码（比如：拼音字符串）转换为中文。
-(global-set-key (kbd "M-j") 'pyim-convert-string-at-point)
+;;(global-set-key (kbd "M-j") 'pyim-convert-string-at-point)
+
+;; 让云字典在最前 
+;;(setq pyim-dcache-icode2word '(pyim-dcache-icode2word pyim-dcache-code2word))
 
 ;; 按 "C-<return>" 将光标前的 regexp 转换为可以搜索中文的 regexp.
-(define-key minibuffer-local-map (kbd "C-RET") 'pyim-cregexp-convert-at-point)
+;;(define-key minibuffer-local-map (kbd "C-RET") 'pyim-cregexp-convert-at-point)
+
+;;-----------------------------RIME--------------------------------------
+(require 'rime)
+(require 'posframe)
+
+;; 设置必须的路径
+(setq rime-emacs-module-header-root "/opt/local/include/")
+(setq rime-librime-root "/opt/local/")
+
+;; 将 Emacs-Rime 的配置路径指向你系统鼠须管的路径！
+;; 这样能直接复用你前面配置好的简体、雾凇拼音等所有词库设定
+(setq rime-user-data-dir "~/Library/Rime")
+
+;; 推荐使用 posframe（悬浮弹窗）来展示候选词条，体验最接近原生输入法
+(setq rime-show-candidate 'posframe)
+(setq rime-posframe-style 'horizontal) ; 候选词垂直排列
+
+;; 设置默认输入法为 rime
+(setq default-input-method "rime")
+
+;; 其他设置
+;;(setq rime-disable-predicates
+;;      '(rime-predicate-after-alphabet-char-p     ; 字母后自动英文
+;;        rime-predicate-prog-in-code-p            ; 写代码时默认英文（注释除外）
+;;        rime-predicate-space-after-cc-p          ; 中文后面加空格后，下一字转英文
+;;        rime-predicate-current-uppercase-p))     ; 输入大写字母时自动英文
+
+
+;;----------------------------------------------------------------------
 
 ;; 在MACOS的系统中取消了C-SPC，我们把这个按键组合绑定为切换输入
 ;; 不知道为什么C-SPC和C-@区分不开
 (global-set-key (kbd "C-SPC") 'toggle-input-method)
 (global-set-key (kbd "C-@") 'toggle-input-method)
+
 
 (provide 'config-lang)

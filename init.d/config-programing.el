@@ -267,9 +267,8 @@
 
 (defun my-auto-complete-c-setup ()
   (require 'auto-complete-c-headers)
-  (require 'auto-complete-clang)
   (auto-complete-mode 1)
-  (setq ac-sources '(ac-source-words-in-same-mode-buffers ac-source-c-headers ac-source-clang))
+  (setq ac-sources '(ac-source-words-in-same-mode-buffers ac-source-c-headers))
   (setq ac-clang-flags (mapcar(lambda (item)(concat "-I" item))
                               (split-string
 ;; echo "" | gcc -v -x c++ -E -
