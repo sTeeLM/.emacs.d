@@ -50,7 +50,7 @@
 ;;(require 'popup)
 
 ;; 设置popup的背景
-;;(set-face-attribute 'pyim-page nil :background "#cf93a0" :foreground "black")
+;;(set-face-attribute 'pyim-page nil :background (face-background 'mode-line) :foreground (face-foreground 'mode-line))
 
 ;; 加载 basedict 拼音词库。
 ;;(pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
@@ -86,7 +86,7 @@
 
 ;;-----------------------------RIME--------------------------------------
 (require 'rime)
-(require 'posframe)
+(require 'popup) 
 
 ;; 设置必须的路径
 (setq rime-emacs-module-header-root "/opt/local/include/")
@@ -97,19 +97,30 @@
 (setq rime-user-data-dir "~/Library/Rime")
 
 ;; 推荐使用 posframe（悬浮弹窗）来展示候选词条，体验最接近原生输入法
-(setq rime-show-candidate 'posframe)
-(setq rime-posframe-style 'horizontal) ; 候选词垂直排列
+;;(setq rime-show-candidate 'posframe)
+;;(setq rime-posframe-style 'horizontal) ; 候选词垂直排列
+
+;; Terminal 下，只能使用popup
+(setq rime-show-candidate 'popup)
+(setq rime-popup-style 'horizontal) ; 候选词垂直排列
+
+(defun set-popup-face-after-frame-creation()
+  ;; 只能裸设置Popup
+  (set-face-attribute 'popup-tip-face nil :background (face-background 'mode-line) :foreground (face-foreground 'mode-line)))
+
+(add-hook 'server-after-make-frame-hook 'set-popup-face-after-frame-creation)
+
+
+;; 其他的魔法设置
+(setq rime-disable-predicates
+      '(rime-predicate-after-alphabet-char-p    ; 1. 刚敲完一个英文字母，后面继续打字时保持英文
+        rime-predicate-prog-in-code-p           ; 2. 【写代码必备】在代码区默认是英文，但只要光标移到代码注释（Comment）或字符串（String）里，自动切回中文
+        rime-predicate-space-after-cc-p         ; 3. 在中文字符后面敲一个空格，下一个字自动变成英文（适合写“我今天用了 Emacs”这种中英混排）
+        rime-predicate-current-uppercase-letter-p      ; 4. 只要我按住 Shift 敲了一个大写字母，这一段自动变英文
+        rime-predicate-org-latex-mode-p))       ; 5. 如果你在用 Org-mode，在 LaTeX 公式块里自动强制英文
 
 ;; 设置默认输入法为 rime
 (setq default-input-method "rime")
-
-;; 其他设置
-;;(setq rime-disable-predicates
-;;      '(rime-predicate-after-alphabet-char-p     ; 字母后自动英文
-;;        rime-predicate-prog-in-code-p            ; 写代码时默认英文（注释除外）
-;;        rime-predicate-space-after-cc-p          ; 中文后面加空格后，下一字转英文
-;;        rime-predicate-current-uppercase-p))     ; 输入大写字母时自动英文
-
 
 ;;----------------------------------------------------------------------
 
