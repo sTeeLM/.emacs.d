@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; 使用TCP server
 (setq server-use-tcp t)
 

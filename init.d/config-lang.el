@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;;; 设置编辑环境
 ;; 设置为中文简体语言环境
 ;(set-language-environment 'Chinese-GB18030)

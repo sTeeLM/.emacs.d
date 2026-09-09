@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; Mark Down配置
 
 ;; 添加md模式
@@ -110,8 +111,8 @@
 ;; Bold字体使用绿色
 ;;  (set-face-attribute 'markdown-bold-face nil :foreground "#cf93a0")
 ;;  (set-face-attribute 'bold nil :foreground "#cf93a0")
-  (set-face-attribute 'markdown-bold-face nil :foreground "#ffff00")
-  (set-face-attribute 'bold nil :foreground "#ffff00")
+;;  (set-face-attribute 'markdown-bold-face nil :foreground "#ffff00")
+;;  (set-face-attribute 'bold nil :foreground "#ffff00")
   (turn-off-auto-fill)
   (local-set-key (kbd "C-c C-s d") 'insert-current-date)
   (local-set-key (kbd "C-c C-s m") 'markdown-insert-inline-image-from-file)

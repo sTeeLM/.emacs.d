@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;配置文件装载路径
 (add-to-list 'load-path "~/.emacs.d/init.d/")
 

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; 设置 Mew
 (autoload 'mew "mew" nil t)
 (autoload 'mew-send "mew" nil t)

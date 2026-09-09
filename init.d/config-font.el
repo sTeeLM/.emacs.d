@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; 中文字体的设置
 
 ;; aaaaaaaaaaaaaaaaaaaaaaaaaaa

@@ -1,5 +1,29 @@
+;; -*- lexical-binding: t; -*-
 ;; 界面配置
+;; 自定义theme
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/solaris-theme-emacs/")
+(add-to-list 'load-path "~/.emacs.d/themes/solaris-theme-emacs/")
 (load-theme 'classic t)
+(load-theme 'solaris-light-high-contrast t)
+
+(with-eval-after-load 'custom
+  (custom-set-faces
+   ;; 自定义选择区域的背景色和字体颜色
+   ;; '(region ((t (:background "#FF69B4"))))
+   ;; 窗口的状态栏
+   '(mode-line ((t (:background "#FF69B4"          ; 背景色：粉色
+                                :foreground "#FFFFFF"          ; 字体色：白色
+                                :box (:line-width 1 :color "#FF69B4") ; 边框：制造一点立体感或间距
+                                :weight bold))))               ; 字体粗细
+   
+   ;; 未激活（后台）窗口的状态栏
+   '(mode-line-inactive ((t (:background "#4A4A4A" ; 背景色：暗灰色
+                            :foreground "#A0A0A0" ; 字体色：浅灰色
+                            :box (:line-width 1 :color "#4A4A4A")
+                            :weight normal))))
+   ))
+
+;;(load-theme 'classic t)
 ;;(load-theme 'blue-mood t)
 ;;(load-theme 'almost-mono-white t)
 ;;(load-theme 'standard-light-tinted t)

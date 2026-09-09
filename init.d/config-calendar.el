@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;设置日历
 (require 'calfw)
 (require 'calfw-cal)

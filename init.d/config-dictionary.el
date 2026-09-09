@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; 词典配置
 
 (require 'dictionary)
