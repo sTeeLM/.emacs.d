@@ -93,7 +93,7 @@
     (display-buffer (find-file file)))
   ;(switch-to-buffer-other-window (find-file file))
   (insert (format my-diary-skel-string
-                  year mon day (calendar-day-name current-date nil)))
+                  year mon day (calendar-day-name (list day mon year) nil)))
   (save-buffer))
 
 (defun my-diary-prepare-archive (diary-root)
