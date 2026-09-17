@@ -10,7 +10,7 @@
 (global-set-key (kbd "C-c l") 'dictionary-lookup-definition)
 
 ;; 默认查找中文词典
-(setq dictionary-default-dictionary "*")
+(setq dictionary-default-dictionary "ecdict")
 
 ;; ipsell设置
 (setq ispell-program-name "ispell")

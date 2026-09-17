@@ -10,7 +10,7 @@
 
 (defcustom my-diary-root "/Volumes/Diary" "root directory or diary archive")
 (defcustom my-diary-skel-string
-"<div class=\"weather\">天气：晴</div>\n\
+"<div class=\"weather\">天气：%s</div>\n\
 <div class=\"date\">%04d.%02d.%02d %s</div>\n\
 ------------------------------------------------\n\
 \n\
@@ -84,7 +84,7 @@
          '(display-buffer-pop-up-window)))
     (display-buffer (find-file file)))
   ;(switch-to-buffer-other-window (find-file file))
-  (insert (format my-diary-skel-string
+  (insert (format my-diary-skel-string (get-city-weather-string "Beijing")
                   year mon day (calendar-day-name (list mon day year) nil)))
   (save-buffer))
 
