@@ -51,7 +51,7 @@
 ;;               (with-selected-frame frame
 ;;                 (my-macos-notebook-font)))))
 
-(kill-buffer "*scratch*")
-(scratch-buffer)
+;;(kill-buffer "*scratch*")
+;;(scratch-buffer)
 
 (provide 'config-font)

@@ -27,6 +27,9 @@
 ;;安装源
 (require 'config-package)
 
+;;天气
+(require 'config-weather)
+
 ;;日历设置
 (require 'config-calendar)
 
