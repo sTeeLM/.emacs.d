@@ -14,13 +14,10 @@
 <div class=\"date\">%04d.%02d.%02d %s</div>\n\
 ------------------------------------------------\n\
 \n\
-## 1. 综述\n\
+## 1. 笔记&思考\n\
   * 无\n\
 \n\
-## 2. 笔记&思考\n\
-  * 无\n\
-\n\
-## 3. 日常新闻\n\
+## 2. 日常新闻\n\
 \n\
 ### 1. 生词表\n\
 \n\
@@ -33,12 +30,7 @@
 ### 3. BBC\n\
 \n\
 ### 4. Bloomberg\n\
-\n\
-### 5. Reuters\n\
-\n\
-### 6. The Economist\n\
-\n"
-
+"
 "skel content in newly created diary")
 
 (define-error 'prepare-archive-error "can not prepare diary archive")
@@ -93,7 +85,7 @@
     (display-buffer (find-file file)))
   ;(switch-to-buffer-other-window (find-file file))
   (insert (format my-diary-skel-string
-                  year mon day (calendar-day-name (list day mon year) nil)))
+                  year mon day (calendar-day-name (list mon day year) nil)))
   (save-buffer))
 
 (defun my-diary-prepare-archive (diary-root)

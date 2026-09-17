@@ -5,7 +5,7 @@
 (setq vterm-buffer-name-string "vterm %s")
 
 ;; 使用bash
-(setq vterm-shell "/bin/bash")
+(setq vterm-shell "/opt/local/bin/bash")
 
 
 (defun my-vter-mode-fun ()

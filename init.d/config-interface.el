@@ -17,7 +17,7 @@
                                 :weight bold))))               ; 字体粗细
    
    ;; 未激活（后台）窗口的状态栏
-   '(mode-line-inactive ((t (:background "#4A4A4A" ; 背景色：暗灰色
+   '(mode-line-inactive ((t (:background "#36524d" ; 背景色：暗灰色
                             :foreground "#A0A0A0" ; 字体色：浅灰色
                             :box (:line-width 1 :color "#4A4A4A")
                             :weight normal))))
@@ -27,14 +27,17 @@
 ;;(load-theme 'blue-mood t)
 ;;(load-theme 'almost-mono-white t)
 ;;(load-theme 'standard-light-tinted t)
-;;(set-scroll-bar-mode nil)
+(set-scroll-bar-mode nil)
 ;;取消滚动栏
 
 ;;(customize-set-variable 'scroll-bar-mode 'right))
 ;;设置滚动栏在窗口右侧，而默认是在左侧
 
-;;(tool-bar-mode nil)
+(tool-bar-mode -1)
 ;;取消工具栏
+
+(menu-bar-mode -1)
+;;取消菜单
 
 ;;启动设置
 ;;(setq default-frame-alist

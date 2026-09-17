@@ -24,7 +24,7 @@
 ;;系统设置
 (require 'config-system)
 
-;; 安装源
+;;安装源
 (require 'config-package)
 
 ;;日历设置

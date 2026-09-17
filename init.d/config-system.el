@@ -2,6 +2,24 @@
 ;; 使用TCP server
 (setq server-use-tcp t)
 
+;; 使用Option发送meta
+(setq x-alt-keysym 'meta)
+
+;; 使用command发送super
+(setq x-meta-keysym 'super)
+
+;; 绑定 Command + C (s-c) 为复制选区（M-w）
+(global-set-key (kbd "s-c") 'kill-ring-save)
+
+;; 绑定 Command + V (s-v) 为粘贴选区（C-y）
+(global-set-key (kbd "s-v") 'yank)
+
+;; 绑定 Command + X (s-x≈) 为剪切选区（C-w）
+(global-set-key (kbd "s-x") 'kill-region)
+
+;; 绑定 Command + A (s-a) 为全选当前 Buffer
+(global-set-key (kbd "s-a") 'mark-whole-buffer)
+
 ;;设置打开文件的缺省路径
 (setq default-directory "~/")
 
