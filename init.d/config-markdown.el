@@ -21,6 +21,7 @@
   "Preview FILE with lynx. To be used with `markdown-live-preview-window-function'."
   (term-run-command (format "lynx %s" file) "lynx" t))
 
+
 ;; 在这行选择用什么方式预览
 ;; markdown-live-preview-window-lynx
 ;; markdown-live-preview-window-w3m

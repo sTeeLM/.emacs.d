@@ -1,57 +1,59 @@
 ;; -*- lexical-binding: t; -*-
 ;; 中文字体的设置
 
-;; aaaaaaaaaaaaaaaaaaaaaaaaaaa
+;; aaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ;; 这行中文应该和上面的英文对齐
 
 ;; 中文字体的自动对齐
-(require 'cnfonts)
+;;(require 'cnfonts)
 ;; 让 cnfonts 在 Emacs 启动时自动生效。
-(cnfonts-mode 1)
+;;(cnfonts-mode 1)
 ;; 添加两个字号增大缩小的快捷键
-(define-key cnfonts-mode-map (kbd "C--") #'cnfonts-decrease-fontsize)
-(define-key cnfonts-mode-map (kbd "C-=") #'cnfonts-increase-fontsize)
+;;(define-key cnfonts-mode-map (kbd "C--") #'cnfonts-decrease-fontsize)
+;;(define-key cnfonts-mode-map (kbd "C-=") #'cnfonts-increase-fontsize)
 ;; 显示所有可用的字体
 ;;(cl-prettyprint (font-family-list))
 
 ;; 自定义字体变量
-(setq cnfonts-personal-fontnames
-      '(
-        ;; 英文字体
-        ("New York" "UbuntuMono Nerd Font" "SF Mono" "Menlo" "Monaco")
-        ;; 中文字体
-        ("PingFang SC" "STHeiti")
-        ;; EXT-B
-        ()
-        ;; Symbol 字符字体
-        ()
-        ))
-  
-;; (defun my-macos-notebook-font()
-;;   "macbook air on 1680x1050."
-;;   (interactive)
-;;   (message "my-macos-notebook-font run, system-type is '%s'" system-type)
-;;   (cond ((eq system-type 'darwin)
-;;          (progn
-;;            ;; https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/UbuntuMono/Regular
-;;            (set-face-attribute 'default nil :font "UbuntuMono Nerd Font Mono 20")
-           
-;;            (setq face-font-rescale-alist '(("冬青黑体简体中文" . 1 )))
+;; (setq cnfonts-personal-fontnames
+;;       '(
+;;         ;; 英文字体
+;;         ("New York" "UbuntuMono Nerd Font" "SF Mono" "Menlo" "Monaco")
+;;         ;; 中文字体
+;;         ("PingFang SC" "STHeiti")
+;;         ;; EXT-B
+;;         ()
+;;         ;; Symbol 字符字体
+;;         ()
+;;         ))
 
-;;            (dolist (charset '(kana han symbol cjk-misc bopomofo))
-;;              (set-fontset-font (frame-parameter nil 'font)
-;;                                charset
-;;                                (font-spec :family "冬青黑体简体中文" :line-spacing 0)))))
-;;         ;; other system goes here:
-;;         (t (message "unsupport system-type %s" system-type))))
+;; 使用自定义的字体函数
+(defun my-setup-fonts (frame)
+  "在指定的 FRAME 激活时，设置中英文字体。"
+  (with-selected-frame frame
+    (when (display-graphic-p frame) ; 确保只在图形界面（GUI）下设置，不影响终端（TUI）
+      ;; 1. 设置英文字体及大小
+      (set-face-attribute 'default frame :font "Ubuntu Mono 16")
 
-;; (add-hook 'after-make-frame-functions
-;;           (lambda (frame)
-;;             (when (display-graphic-p frame)
-;;               (with-selected-frame frame
-;;                 (my-macos-notebook-font)))))
+      ;; 设置eww的字体
+      (set-face-attribute 'variable-pitch nil  :font "Ubuntu Mono 16"   ; 替换为你系统中安装的字体名和字号
+                    :weight 'normal)
 
-;;(kill-buffer "*scratch*")
-;;(scratch-buffer)
+      ;; 2. 设置中文字体
+      (dolist (charset '(han symbol cjk-misc))
+        (set-fontset-font t charset (font-spec :family "Maple Mono NF CN" :size 18) frame)))))
+
+;; 核心：将函数挂载到 Frame 创建的钩子上
+(add-hook 'after-make-frame-functions #'my-setup-fonts)
+
+;; 触发机制：确保启动时的第一个主 Frame 也能正确加载字体
+(my-setup-fonts (selected-frame))
+
+;; 1. 设置英文字体及大小
+;; (set-face-attribute 'default nil :font "Ubuntu Mono 16")
+
+;; 2. 设置中文字体
+;;(dolist (charset '(han symbol cjk-misc))
+;;  (set-fontset-font t charset (font-spec :family "Maple Mono NF CN" :size 18)))
 
 (provide 'config-font)

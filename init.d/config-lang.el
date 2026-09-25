@@ -95,7 +95,8 @@
 
 ;; 将 Emacs-Rime 的配置路径指向你系统鼠须管的路径！
 ;; 这样能直接复用你前面配置好的简体、雾凇拼音等所有词库设定
-(setq rime-user-data-dir "~/Library/Rime")
+(setq rime-user-data-dir "~/.emacs.d/rime")
+
 
 ;; 推荐使用 posframe（悬浮弹窗）来展示候选词条，体验最接近原生输入法
 ;;(setq rime-show-candidate 'posframe)
