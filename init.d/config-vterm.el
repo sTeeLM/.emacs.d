@@ -8,15 +8,14 @@
 (setq vterm-shell "/opt/local/bin/bash")
 
 
-(defun my-vter-mode-fun ()
+
+(defun my-vterm-mode-fun ()
   (turn-off-auto-fill)
-  (setq vterm-timer-delay 0.01)
-  ;;  (term-set-escape-char ?\C-x)
-  ;; (define-key term-raw-map "\M-y" 'yank-pop)
-  ;; (define-key term-raw-map "\M-w" 'kill-ring-save)
+  (setq vterm-timer-delay nil)
+  (define-key vterm-mode-map (kbd "C-c C-SPC") #'toggle-input-method)
   (message "USE VTERM!"))
 
-(add-hook 'vterm-mode-hook 'my-vter-mode-fun)
+(add-hook 'vterm-mode-hook 'my-vterm-mode-fun)
 
                                         ;
 ;;(lambda ()

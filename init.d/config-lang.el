@@ -98,19 +98,31 @@
 (setq rime-user-data-dir "~/.emacs.d/rime")
 
 
+;; 定时同步用户数据, 因为所有的rime实例共用一个sync目录，只需要定期同步就可以共享用户词库
+(defun my-rime-sync()
+  (message "sync rime user data")
+  (rime-activate)
+  (rime-sync))
+(run-at-time nil 3600 'my-rime-sync) ; 第一个参数为 nil 表示立即开始
+
 ;; 推荐使用 posframe（悬浮弹窗）来展示候选词条，体验最接近原生输入法
 ;;(setq rime-show-candidate 'posframe)
 ;;(setq rime-posframe-style 'horizontal) ; 候选词垂直排列
 
-;; Terminal 下，只能使用popup
-(setq rime-show-candidate 'popup)
-(setq rime-popup-style 'horizontal) ; 候选词垂直排列
+;; Terminal 下，只能使用popup, 设置为postframe, 在terminal 下会退化为popup
+(setq rime-show-candidate 'posframe)
 
-(defun set-popup-face-after-frame-creation()
-  ;; 只能裸设置Popup
-  (set-face-attribute 'popup-tip-face nil :background (face-background 'mode-line) :foreground (face-foreground 'mode-line)))
+;; 候选词垂直排列
+(setq rime-posframe-style 'horizontal)
+(setq rime-popup-style 'horizontal) 
 
-(add-hook 'server-after-make-frame-hook 'set-popup-face-after-frame-creation)
+(defun set-im-face-after-frame-creation()
+  (set-face-attribute
+   'popup-tip-face nil
+   :background (face-background 'mode-line)
+   :foreground (face-foreground 'mode-line)))
+
+(add-hook 'server-after-make-frame-hook 'set-im-face-after-frame-creation)
 
 
 ;; 其他的魔法设置

@@ -53,3 +53,4 @@
 
 ;;字体设置
 (require 'config-font) 
+(put 'list-timers 'disabled nil)

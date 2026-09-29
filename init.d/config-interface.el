@@ -4,7 +4,7 @@
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/solaris-theme-emacs/")
 (add-to-list 'load-path "~/.emacs.d/themes/solaris-theme-emacs/")
 (load-theme 'classic t)
-(load-theme 'solaris-light-high-contrast t)
+(load-theme 'solaris-dark-high-contrast t)
 
 (with-eval-after-load 'custom
   (custom-set-faces
@@ -56,7 +56,9 @@
 ;;               (left-fringe)))
 
 ;;启动自动最大化(数据自己调整，注意格式，如(top . 0)，圆点前后都要留有空格)
-(setq initial-frame-alist '((top . 0) (left . 0) (width . 142) (height . 49)))
+(setq default-frame-alist '((vertical-scroll-bars) (maximized . t)))
+;; (add-to-list 'initial-frame-alist '(maximized . t))
+;; (setq initial-frame-alist '((top . 0) (left . 0) (width . 142) (height . 49)))
 
 
 ;; 设置另外一些颜色：语法高亮显示的背景和主题，区域选择的背景和主题，二次选择的背景和选择
