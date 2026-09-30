@@ -3,8 +3,31 @@
 ;; 自定义theme
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/solaris-theme-emacs/")
 (add-to-list 'load-path "~/.emacs.d/themes/solaris-theme-emacs/")
+;; 先装载一个基本的
 (load-theme 'classic t)
-(load-theme 'solaris-dark-high-contrast t)
+
+(defun my-apply-theme (frame)
+  "根据当前 Frame 的类型（GUI 或终端）应用不同的主题。"
+  (with-selected-frame frame
+    (if (display-graphic-p frame)
+        ;; ---- 图形界面（GUI 模式）下的主题 ----
+        (progn
+          ;; 先禁用之前的所有主题，防止色彩叠加污染
+          (mapc #'disable-theme custom-enabled-themes)
+          ;; 换成你喜欢的 GUI 主题，例如 doom-one 或 elegant
+          (load-theme 'solaris-dark-high-contrast t))
+      
+      ;; ---- 终端（Terminal 模式）下的主题 ----
+      (progn
+        (mapc #'disable-theme custom-enabled-themes)
+        ;; 换成适合终端 256 色的主题，例如 doom-vibrant 或 tty-optimized
+        (load-theme 'blue-mood t)))))
+
+;; 确保在新建 Frame（包括使用 emacsclient）时自动切换主题
+(add-hook 'after-make-frame-functions #'my-apply-theme)
+
+;; 确保在 Emacs 刚启动（非 daemon 模式直接启动）时也能正确应用
+(my-apply-theme (selected-frame))
 
 (with-eval-after-load 'custom
   (custom-set-faces
@@ -23,10 +46,6 @@
                             :weight normal))))
    ))
 
-;;(load-theme 'classic t)
-;;(load-theme 'blue-mood t)
-;;(load-theme 'almost-mono-white t)
-;;(load-theme 'standard-light-tinted t)
 (set-scroll-bar-mode nil)
 ;;取消滚动栏
 
