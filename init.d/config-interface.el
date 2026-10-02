@@ -75,9 +75,9 @@
 ;;               (left-fringe)))
 
 ;;启动自动最大化(数据自己调整，注意格式，如(top . 0)，圆点前后都要留有空格)
-(setq default-frame-alist '((vertical-scroll-bars) (maximized . t)))
-;; (add-to-list 'initial-frame-alist '(maximized . t))
-;; (setq initial-frame-alist '((top . 0) (left . 0) (width . 142) (height . 49)))
+(setq default-frame-alist '((vertical-scroll-bars) (fullscreen . maximized)))
+;; 如果你需要“全屏/无边框”（类似看电影的完全置顶全屏），可以改用下面这行：
+;; (add-to-list 'default-frame-alist '(fullscreen . fullboth))
 
 
 ;; 设置另外一些颜色：语法高亮显示的背景和主题，区域选择的背景和主题，二次选择的背景和选择

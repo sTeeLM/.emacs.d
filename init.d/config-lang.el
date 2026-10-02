@@ -101,7 +101,7 @@
 ;; 定时同步用户数据, 因为所有的rime实例共用一个sync目录，只需要定期同步就可以共享用户词库
 (defun my-rime-sync()
   (message "sync rime user data")
-  (rime-activate)
+  (rime-activate 0)
   (rime-sync))
 (run-at-time nil 3600 'my-rime-sync) ; 第一个参数为 nil 表示立即开始
 

@@ -3,6 +3,9 @@
 (autoload 'mew "mew" nil t)
 (autoload 'mew-send "mew" nil t)
 
+;; 添加可执行文件路径
+(add-to-list 'exec-path "~/.emacs.d/plugin.d/mew-bin")
+
 (add-to-list 'load-path "~/.emacs.d/plugin.d/mew-mbox")
 (require 'mew-mbox)
 (setq mew-mbox-max-level 3)
@@ -11,21 +14,22 @@
 
 ;; 这些可以用f键隐藏
 (setq mew-mbox-filter-regex-list ;;这几个mbox一般不需要看
-      '("^%Trash$" "^%Sent$" "^%Drafts$" "^%Junk$" "^%Archive$" "^%Notes" "^%queue"))
+      '("^%Trash$" "^%Sent$" "^%Drafts$" "^%Junk$" "^%Archive" "^%Notes" "^%queue"))
 (setq mew-mbox-filter-name-do t)
 (setq mew-mbox-filter-zero-do t)
 
 ;; 这些永远不显示在邮箱列表里，也不去探测
 (setq mew-mbox-imap-exclude-list
       '("^%inbox$" ;; 因为我们做了邮件分拣，所以不需要扫描这个目录
-        "^%queue$" "^%Notes" "^%External/$" "^%MailList/$"))
+        "^%queue$" "^%Notes" "^%External/$" "^%MailList/$" "^%Archive/$"))
 
 ;; 邮件到来的时候播放声音
-
+;;(defun play-new-mail-sound ()
+;;  (make-process :name "play-new-mail-sound"
+;;                :command (list "/bin/sh" "-c" "afplay ~/.emacs.d/plugin.d/mew-mbox/etc/newmail.wav")))
 
 (defun play-new-mail-sound ()
-  (make-process :name "play-new-mail-sound"
-                :command (list "/bin/sh" "-c" "afplay ~/.emacs.d/plugin.d/mew-mbox/etc/newmail.wav")))
+  (message "New mail sound!"))
 
 (setq mew-mbox-biff-new-mail-sound-fun 'play-new-mail-sound)
 
