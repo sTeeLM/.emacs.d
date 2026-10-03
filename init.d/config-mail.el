@@ -3,7 +3,7 @@
 (autoload 'mew "mew" nil t)
 (autoload 'mew-send "mew" nil t)
 
-;; 添加可执行文件路径
+;; 添加可执行文件路径（mewdecode等等）
 (add-to-list 'exec-path "~/.emacs.d/plugin.d/mew-bin")
 
 (add-to-list 'load-path "~/.emacs.d/plugin.d/mew-mbox")
@@ -14,14 +14,19 @@
 
 ;; 这些可以用f键隐藏
 (setq mew-mbox-filter-regex-list ;;这几个mbox一般不需要看
-      '("^%Trash$" "^%Sent$" "^%Drafts$" "^%Junk$" "^%Archive" "^%Notes" "^%queue"))
+      '("^%inbox$" "^%Trash$" "^%Sent$" "^%Drafts$" "^%Junk$"))
 (setq mew-mbox-filter-name-do t)
 (setq mew-mbox-filter-zero-do t)
 
 ;; 这些永远不显示在邮箱列表里，也不去探测
 (setq mew-mbox-imap-exclude-list
-      '("^%inbox$" ;; 因为我们做了邮件分拣，所以不需要扫描这个目录
-        "^%queue$" "^%Notes" "^%External/$" "^%MailList/$" "^%Archive/$"))
+      '(
+        "^%queue"
+        "^%Notes"  ;; 备忘录
+        "^%External/$" ;; 这个是空目录
+        "^%MailList/$" ;; 空目录
+        "^%Archive"    ;; 归档目录
+        ))
 
 ;; 邮件到来的时候播放声音
 ;;(defun play-new-mail-sound ()

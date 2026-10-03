@@ -87,11 +87,12 @@
 
 (define-key mew-mbox-mode-map "v" 'mew-mbox-view-mbox-and-ls)
 (define-key mew-mbox-mode-map (kbd "RET") 'mew-mbox-view-mbox)
-(define-key mew-mbox-mode-map "s" 'mew-mbox-update-mbox)
-(define-key mew-mbox-mode-map "S" 'mew-mbox-update-all)
+(define-key mew-mbox-mode-map "u" 'mew-mbox-update-mbox)
+(define-key mew-mbox-mode-map "U" 'mew-mbox-update-all)
 (define-key mew-mbox-mode-map "r" 'mew-mbox-refresh)
 (define-key mew-mbox-mode-map "f" 'mew-mbox-toggle-filter-name)
 (define-key mew-mbox-mode-map "0" 'mew-mbox-toggle-filter-new)
+(define-key mew-mbox-mode-map "Z" 'mew-mbox-rebuild-mbox-list)
 (define-key mew-mbox-mode-map "Q" 'mew-summary-quit)
 
 ;; 在summary模式下按G键打开邮箱列表
@@ -274,6 +275,15 @@
   (setq mew-mbox-filter-zero-do (not mew-mbox-filter-zero-do))
   (mew-mbox-refresh))
 
+(defun mew-mbox-rebuild-mbox-list(arg)
+  "重新构建邮箱列表"
+  (interactive "P")
+  (if arg
+      (message "Will rebuild mbox list...")
+    (message "Will reload mbox list..."))
+  (mew-mbox-condition-status-update arg)
+  (mew-mbox-refresh))
+
 (defun mew-mbox-generate-entries ()
   "生成表格条目"
   ;;(mew-mbox-log-debug "mew-mbox-generate-entries called")
@@ -340,10 +350,14 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun mew-mbox-status-update ()
+(defun mew-mbox-condition-status-update (false)
   (let ((buffer (mew-mbox-buffer-find (or mew-case "default") mew-proto)))
     (when buffer
-      (mew-mbox-proto-call (mew-mbox-proto-symbol mew-proto) 'status-update buffer mew-init-p))))
+      (mew-mbox-proto-call (mew-mbox-proto-symbol mew-proto) 'status-update buffer false))))
+
+
+(defun mew-mbox-status-update ()
+  (mew-mbox-condition-status-update mew-init-p))
 
 (defun mew-mbox-init ()
   "初始化函数, 在启动mew的时候调用"

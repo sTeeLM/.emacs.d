@@ -68,15 +68,15 @@
          (mbox-path (mew-expand-folder (mew-case-folder case "%")))
          (mbox-alist-file-path (file-name-concat mbox-path mew-mbox-imap-cache-file)))
     (condition-case err 
-        (if (or force-rebuild (not (file-exists-p  mbox-alist-file-path)))
+        (if (or force-rebuild (not (file-exists-p mbox-alist-file-path)))
             (progn 
               (setq mbox-list (mew-imap-folder-alist case))
               (dolist (mbox-list-slot mbox-list)
                 (let ((mbox (car mbox-list-slot)))
                   (when (mew-mbox-imap-filter-mbox mbox exclude-list)
                     (setq alist (append alist (list (cons mbox
-                                                          (vector index nil nil nil nil nil nil nil nil)))))
-                    (setq index (1+ index))))))
+                                                          (vector index nil nil nil nil nil nil nil nil))))))
+                    (setq index (1+ index)))))
           (progn
             (setq alist (mew-lisp-load mbox-alist-file-path))))
       (error (message "mew-mbox-imap-alist-load failed %s" (error-message-string err))))
@@ -607,7 +607,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
 (defun mew-mbox-imap-status-update (buffer init)
   "Mew启动后会调用该函数，init为nil时，什么都不用做; init为t时\
 表示Mew重新从服务器读取了邮箱列表，我们需要更新元数据"
-  (mew-mbox-log-debug "mew-mbox-imap-status-update called with (%s)" init)
+  (mew-mbox-log-info "mew-mbox-imap-status-update called with (%s)" init)
   (when (and init buffer)
     (mew-mbox-log-info "rebuild mbox alist!")
     (let* ((case (mew-mbox-buffer-get-property buffer 'case))
