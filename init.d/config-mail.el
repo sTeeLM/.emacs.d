@@ -179,20 +179,18 @@
 
 ;;;; HTML阅读器配置
 ;; (1) 使用内置的shr阅读HTML邮件，且不显示背景色
-(setq shr-use-colors nil)
+;; (setq shr-use-colors nil)
 
 ;; (2) 使用w3m阅读html邮件
-;; (add-to-list 'load-path "~/.emacs.d/plugin.d/emacs-w3m/share/emacs/site-lisp/w3m")
-;; (require 'w3m-load)
-;; (require 'mew-w3m)
-;; (setq mew-use-w3m-minor-mode t)
-;; (setq mew-w3m-auto-insert-image t)
-;; (add-hook 'mew-message-hook 'mew-w3m-minor-mode-setter)
-;; (setq mew-prog-text/html 'mew-mime-text/html-w3m)
-;; (setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
-;; (define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
-
-
+(add-to-list 'load-path "~/.emacs.d/plugin.d/emacs-w3m/share/emacs/site-lisp/w3m")
+(require 'w3m-load)
+(require 'mew-w3m)
+(setq mew-use-w3m-minor-mode nil)
+(setq mew-w3m-auto-insert-image t)
+(add-hook 'mew-message-hook 'mew-w3m-minor-mode-setter)
+(setq mew-prog-text/html 'mew-mime-text/html-w3m)
+(setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
+(define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
 
 ;;mew启动时不自动获取邮件
 (setq mew-auto-get nil)
