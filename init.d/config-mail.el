@@ -169,6 +169,12 @@
 (setq mew-use-text/html t)
 (setq mew-mime-multipart-alternative-list '("text/html" "text/plain" ".*"))
 (setq mew-prog-html '(mew-mime-text/html mew-mime-text/html-ext))
+;; 允许 Mew 自动在 Message 缓冲区中内联渲染图片
+(setq mew-mime-image-inline t)
+;; 如果收到的是 HTML 邮件（包含外链图片或内嵌图片），默认优先显示 HTML 部分
+(setq mew-mime-text/html-inline t)
+;; 告诉渲染器在显示 HTML 内容时顺便载入图片
+(setq shr-inhibit-images nil)
 
 
 ;;;; HTML阅读器配置
@@ -176,6 +182,7 @@
 (setq shr-use-colors nil)
 
 ;; (2) 使用w3m阅读html邮件
+;; (add-to-list 'load-path "~/.emacs.d/plugin.d/emacs-w3m/share/emacs/site-lisp/w3m")
 ;; (require 'w3m-load)
 ;; (require 'mew-w3m)
 ;; (setq mew-use-w3m-minor-mode t)
@@ -184,6 +191,8 @@
 ;; (setq mew-prog-text/html 'mew-mime-text/html-w3m)
 ;; (setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
 ;; (define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
+
+
 
 ;;mew启动时不自动获取邮件
 (setq mew-auto-get nil)

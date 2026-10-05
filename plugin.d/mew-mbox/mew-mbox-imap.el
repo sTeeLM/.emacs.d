@@ -546,7 +546,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
   (mew-mbox-imap-get-pass buffer 'foreground)
   (let ((case (mew-mbox-buffer-get-property buffer 'case))
         (proto (mew-mbox-buffer-get-property buffer 'proto)))
-    (mew-mbox-buffer-set-property buffer 'mbox-alist (mew-mbox-imap-alist-load case nil))
+    (mew-mbox-buffer-set-property buffer 'mbox-alist (mew-mbox-imap-alist-load case nil mew-mbox-imap-exclude-list))
     (mew-mbox-buffer-set-property buffer
                                   'mutex (make-mutex (format "mutex-%s:%s" case proto)))
     (mew-mbox-buffer-set-property buffer
@@ -600,7 +600,6 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
                      (mew-mbox-buffer-get-property buffer 'mbox-alist)
                      (mew-mbox-buffer-get-property buffer 'process-alist) name-filter new-filter)))
     entries))
-
 
 ;; 启动mew时会调用：mew-init-p ＝nil
 ;; Z 时会调用：mew-init-p ＝t  

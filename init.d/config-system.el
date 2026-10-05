@@ -14,7 +14,7 @@
 ;; 绑定 Command + V (s-v) 为粘贴选区（C-y）
 (global-set-key (kbd "s-v") 'yank)
 
-;; 绑定 Command + X (s-x≈) 为剪切选区（C-w）
+;; 绑定 Command + X (s-x) 为剪切选区（C-w）
 (global-set-key (kbd "s-x") 'kill-region)
 
 ;; 绑定 Command + A (s-a) 为全选当前 Buffer
@@ -39,11 +39,11 @@
 (setq kill-ring-max 2000)
 
 ;; Autofill in all modes
-(setq-default auto-fill-function 'do-auto-fill)
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
+;;(setq-default auto-fill-function 'do-auto-fill)
+;;(add-hook 'text-mode-hook 'turn-on-auto-fill)
 
-;;把 fill-column 设为200 . 这样的文字更好读
-(setq default-fill-column 200)
+;;把 fill-column 设为600 . 这样的文字更好读
+(setq default-fill-column 600)
 
 ;;不用 TAB 字符来indent, 这会引起很多奇怪的错误。编辑 Makefile 的时候也不用担心，因为 makefile-mode 会把 TAB 键设置成真正的 TAB 字符，并且加亮显示的。
 (setq-default indent-tabs-mode nil)

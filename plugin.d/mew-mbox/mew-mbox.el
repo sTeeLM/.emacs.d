@@ -275,13 +275,11 @@
   (setq mew-mbox-filter-zero-do (not mew-mbox-filter-zero-do))
   (mew-mbox-refresh))
 
-(defun mew-mbox-rebuild-mbox-list(arg)
+(defun mew-mbox-rebuild-mbox-list()
   "重新构建邮箱列表"
-  (interactive "P")
-  (if arg
-      (message "Will rebuild mbox list...")
-    (message "Will reload mbox list..."))
-  (mew-mbox-condition-status-update arg)
+  (interactive)
+  (message "Will rebouild mbox list...")
+  (mew-mbox-condition-status-update t)
   (mew-mbox-refresh))
 
 (defun mew-mbox-generate-entries ()
@@ -350,14 +348,13 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun mew-mbox-condition-status-update (false)
+(defun mew-mbox-condition-status-update (force)
   (let ((buffer (mew-mbox-buffer-find (or mew-case "default") mew-proto)))
     (when buffer
-      (mew-mbox-proto-call (mew-mbox-proto-symbol mew-proto) 'status-update buffer false))))
-
+      (mew-mbox-proto-call (mew-mbox-proto-symbol mew-proto) 'status-update buffer force))))
 
 (defun mew-mbox-status-update ()
-  (mew-mbox-condition-status-update mew-init-p))
+  (mew-mbox-condition-status-update  mew-init-p))
 
 (defun mew-mbox-init ()
   "初始化函数, 在启动mew的时候调用"
