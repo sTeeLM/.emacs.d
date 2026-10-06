@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; dummy 音乐播放器
 ;; 以一个m3u格式的文件为媒体库的
 ;; 及其简单的表格界面的音乐播放器
@@ -359,7 +360,7 @@
         (year (if info-valid (aref data 7) "???"))
         (genre (if info-valid (aref data 8) "???"))
         (duration (if info-valid (aref data 9) "???")))
-    (list id (vector play-flag mark type title author album track year genre duration))))
+    (cons id (vector play-flag mark type title author album track year genre duration))))
 
 (defun dmp-table-merge-entries (new-entries)
   "将dmp-table-entries-alist中的play-flag和mark merge到new-entries，忽略new-entries中没有的条目"

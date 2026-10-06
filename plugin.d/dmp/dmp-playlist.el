@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; DMP playlist元数据和相关管理函数
 
 ;; 元数据格式
@@ -5,7 +6,7 @@
 ;; (("abs-file-path" . [xxx]) .. .. )
 ;; P     : in the player's job list
 ;; I     : info 信息有效
-;; type  : 文件类型 MP3 WAV OGG
+;; type  : 文件类型 MP3 OGG FLAC M4A
 ;; title : 歌曲标题
 ;; author: 歌曲作者
 ;; album : 专辑
@@ -19,7 +20,7 @@
 (defvar dmp-playlist-mutex nil
   "对核心元数据的锁")
 
-(defvar dmp-lisp-max-length 2000
+(defvar dmp-lisp-max-length 20000000
   "默认元数据最大长度")
 
 (defvar dmp-playlist-filename "~/Downloads/playlist.el"
@@ -37,24 +38,48 @@
           (progn
             (setq dmp-playlist-alist (dmp-lisp-load dmp-playlist-filename))
             (setq ret t))
-        (error (progn (dmp-log-error "dmp-playlist-load failed %s" (error-message-string err))))))))
-
+        (dmp-log-error "dmp-playlist-load failed %s" (error-message-string err)))))
+  ret)
 
 (defun dmp-playlist-save ()
   "保存playlist元数据到硬盘"
   (with-mutex dmp-playlist-mutex
     (condition-case err
         (dmp-lisp-save dmp-playlist-filename dmp-playlist-alist t t)
-      (error (dmp-log-error "dmp-playlist-save failed %s" (error-message-string err))))))
+      (dmp-log-error "dmp-playlist-save failed %s" (error-message-string err)))))
 
+(defun dmp-playlist-append-file-internal (file)
+  "向列表中追加单个文件，无锁"
+  (when (and (file-readable-p file) (not (assoc file dmp-playlist-alist)))
+    (setq dmp-playlist-alist
+          (append (list (cons file (vector nil nil nil nil nil nil nil nil nil nil)))
+                  dmp-playlist-alist))))
 
 (defun dmp-playlist-append-file (file)
   "向列表中追加单个文件"
-  nil)
+  (if (file-readable-p file)
+      (with-mutex dmp-playlist-mutex
+        (dmp-playlist-append-file-internal file)
+        t)
+    nil))
+
+(defun dmp-playlist-match-extensions (ext-list)
+  "根据 EXT-LIST 生成匹配多个扩展名的正则表达式。"
+  (concat "\\." (regexp-opt ext-list t) "\\'"))
 
 (defun dmp-playlist-append-directory (directory)
   "向列表中追加整个目录"
-  nil)
+  (if (file-directory-p directory)
+      (with-mutex dmp-playlist-mutex
+        (let ((files
+               (directory-files-recursively
+                (expand-file-name directory)
+                ( dmp-playlist-match-extensions '("mp3" "flac" "m4a" "ogg")))))
+          (dolist (f files)
+            (dmp-log-debug "adding file %s" f)
+            (dmp-playlist-append-file-internal f)))
+        t)
+    nil))
 
 (defun dmp-playlist-remove-entries (entries)
   "删除列表"

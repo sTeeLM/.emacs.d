@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; DMP 歌曲元数据更新模块
 
 (defun dmp-info-init()

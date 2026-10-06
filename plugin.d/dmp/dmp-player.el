@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; DMP播放器模块
 
 (defun dmp-player-init ()

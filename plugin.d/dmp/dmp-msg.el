@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; DMP 日志模块
 
 (require 'config-lib)
