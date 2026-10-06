@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; Mark Down配置
 
 ;; 添加md模式
@@ -19,6 +20,7 @@
 (defun markdown-live-preview-window-lynx (file)
   "Preview FILE with lynx. To be used with `markdown-live-preview-window-function'."
   (term-run-command (format "lynx %s" file) "lynx" t))
+
 
 ;; 在这行选择用什么方式预览
 ;; markdown-live-preview-window-lynx
@@ -107,11 +109,11 @@
 (defun my-md-hook ()
   (message "run my-md-hook")
   (markdown-live-preview-mode)
-;; Bold字体使用绿色
-;;  (set-face-attribute 'markdown-bold-face nil :foreground "#cf93a0")
+;;  Bold字体使用mode-line的背景色
+;； (set-face-attribute 'markdown-bold-face nil :foreground  (face-background 'mode-line))
 ;;  (set-face-attribute 'bold nil :foreground "#cf93a0")
-  (set-face-attribute 'markdown-bold-face nil :foreground "#ffff00")
-  (set-face-attribute 'bold nil :foreground "#ffff00")
+;;  (set-face-attribute 'markdown-bold-face nil :foreground "#ffff00")
+;;  (set-face-attribute 'bold nil :foreground "#ffff00")
   (turn-off-auto-fill)
   (local-set-key (kbd "C-c C-s d") 'insert-current-date)
   (local-set-key (kbd "C-c C-s m") 'markdown-insert-inline-image-from-file)
@@ -122,7 +124,7 @@
 
 ;; Markdown可以预览
 ;(custom-set-variables
-(setq markdown-command "pandoc -s -c /Users/michael/.emacs.d/plugin.d/pandoc/pandoc.css --metadata title=preview")
+(setq markdown-command "pandoc -s --mathjax -c /Users/michael/.emacs.d/plugin.d/pandoc/pandoc.css --metadata title=preview")
 
 
 (provide 'config-markdown)

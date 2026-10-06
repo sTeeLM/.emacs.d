@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; 阅读词汇
 
 (defcustom mysay-program "~/.emacs.d/plugin.d/spell/mysay" "Localtion of mysay program")

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;配置文件装载路径
 (add-to-list 'load-path "~/.emacs.d/init.d/")
 
@@ -22,8 +24,11 @@
 ;;系统设置
 (require 'config-system)
 
-;; 安装源
+;;安装源
 (require 'config-package)
+
+;;天气
+(require 'config-weather)
 
 ;;日历设置
 (require 'config-calendar)
@@ -47,4 +52,5 @@
 (require 'config-markdown)
 
 ;;字体设置
-(require 'config-font)
+(require 'config-font) 
+(put 'list-timers 'disabled nil)

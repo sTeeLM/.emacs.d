@@ -1,6 +1,10 @@
+;; -*- lexical-binding: t; -*-
 ;; 设置 Mew
 (autoload 'mew "mew" nil t)
 (autoload 'mew-send "mew" nil t)
+
+;; 添加可执行文件路径（mewdecode等等）
+(add-to-list 'exec-path "~/.emacs.d/plugin.d/mew-bin")
 
 (add-to-list 'load-path "~/.emacs.d/plugin.d/mew-mbox")
 (require 'mew-mbox)
@@ -10,21 +14,27 @@
 
 ;; 这些可以用f键隐藏
 (setq mew-mbox-filter-regex-list ;;这几个mbox一般不需要看
-      '("^%Trash$" "^%Sent$" "^%Drafts$" "^%Junk$" "^%Archive$"))
+      '("^%inbox$" "^%Trash$" "^%Sent$" "^%Drafts$" "^%Junk$"))
 (setq mew-mbox-filter-name-do t)
 (setq mew-mbox-filter-zero-do t)
 
 ;; 这些永远不显示在邮箱列表里，也不去探测
 (setq mew-mbox-imap-exclude-list
-      '("^%inbox$" ;; 因为我们做了邮件分拣，所以不需要扫描这个目录
-        "^%queue$" "^%Notes" "^%External/$" "^%MailList/$"))
+      '(
+        "^%queue"
+        "^%Notes"  ;; 备忘录
+        "^%External/$" ;; 这个是空目录
+        "^%MailList/$" ;; 空目录
+        "^%Archive"    ;; 归档目录
+        ))
 
 ;; 邮件到来的时候播放声音
-
+;;(defun play-new-mail-sound ()
+;;  (make-process :name "play-new-mail-sound"
+;;                :command (list "/bin/sh" "-c" "afplay ~/.emacs.d/plugin.d/mew-mbox/etc/newmail.wav")))
 
 (defun play-new-mail-sound ()
-  (make-process :name "play-new-mail-sound"
-                :command (list "/bin/sh" "-c" "afplay ~/.emacs.d/plugin.d/mew-mbox/etc/newmail.wav")))
+  (message "New mail sound!"))
 
 (setq mew-mbox-biff-new-mail-sound-fun 'play-new-mail-sound)
 
@@ -156,24 +166,37 @@
 
 ;; 可以阅读html邮件
 (require 'mime-w3m)
+;; 告诉 Mew 开启 HTML 支持
 (setq mew-use-text/html t)
+;; 永远优先看HTML
 (setq mew-mime-multipart-alternative-list '("text/html" "text/plain" ".*"))
 (setq mew-prog-html '(mew-mime-text/html mew-mime-text/html-ext))
+;; 允许 Mew 自动在 Message 缓冲区中内联渲染图片
+(setq mew-mime-image-inline t)
+;; 如果收到的是 HTML 邮件（包含外链图片或内嵌图片），默认优先显示 HTML 部分
+(setq mew-mime-text/html-inline t)
+;; 告诉渲染器在显示 HTML 内容时顺便载入图片
+(setq shr-inhibit-images nil)
 
 
 ;;;; HTML阅读器配置
 ;; (1) 使用内置的shr阅读HTML邮件，且不显示背景色
-(setq shr-use-colors nil)
+;; (setq shr-use-colors nil)
 
 ;; (2) 使用w3m阅读html邮件
-;; (require 'w3m-load)
-;; (require 'mew-w3m)
-;; (setq mew-use-w3m-minor-mode t)
-;; (setq mew-w3m-auto-insert-image t)
-;; (add-hook 'mew-message-hook 'mew-w3m-minor-mode-setter)
-;; (setq mew-prog-text/html 'mew-mime-text/html-w3m)
-;; (setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
-;; (define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
+(add-to-list 'load-path "~/.emacs.d/plugin.d/emacs-w3m/share/emacs/site-lisp/w3m")
+(require 'w3m-load)
+(require 'mew-w3m)
+
+;; 决定在显示 HTML 邮件的 Message 缓存区中，是否启用 w3m-minor-mode
+;; 例如，是否在展示html邮件的时候，让光标随方向键跟踪url
+(setq mew-use-w3m-minor-mode nil)
+(setq mew-w3m-auto-insert-image t)
+(add-hook 'mew-message-hook 'mew-w3m-minor-mode-setter)
+(setq mew-prog-text/html 'mew-mime-text/html-w3m)
+(setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
+(define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
+
 
 ;;mew启动时不自动获取邮件
 (setq mew-auto-get nil)

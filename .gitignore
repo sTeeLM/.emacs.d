@@ -1,3 +1,4 @@
+network-security.data
 auto-save-list
 caldav-cache
 eln-cache
@@ -14,3 +15,12 @@ emms
 emms.m3u
 ac-comphist.dat
 server
+rime
+plugin.d/mew-bin/cmew
+plugin.d/mew-bin/incm
+plugin.d/mew-bin/mewcat
+plugin.d/mew-bin/mewdecode
+plugin.d/mew-bin/mewencode
+plugin.d/mew-bin/mewest
+plugin.d/mew-bin/mewl
+plugin.d/mew-bin/smew

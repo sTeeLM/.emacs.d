@@ -1,16 +1,62 @@
+;; -*- lexical-binding: t; -*-
 ;; 界面配置
+;; 自定义theme
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/solaris-theme-emacs/")
+(add-to-list 'load-path "~/.emacs.d/themes/solaris-theme-emacs/")
+;; 先装载一个基本的
 (load-theme 'classic t)
-(load-theme 'blue-mood t)
-;;(load-theme 'almost-mono-white t)
-;;(load-theme 'standard-light-tinted t)
-;;(set-scroll-bar-mode nil)
+
+(defun my-apply-theme (frame)
+  "根据当前 Frame 的类型（GUI 或终端）应用不同的主题。"
+  (with-selected-frame frame
+    (if (display-graphic-p frame)
+        ;; ---- 图形界面（GUI 模式）下的主题 ----
+        (progn
+          ;; 先禁用之前的所有主题，防止色彩叠加污染
+          (mapc #'disable-theme custom-enabled-themes)
+          ;; 换成你喜欢的 GUI 主题，例如 doom-one 或 elegant
+          (load-theme 'solaris-dark-high-contrast t))
+      
+      ;; ---- 终端（Terminal 模式）下的主题 ----
+      (progn
+        (mapc #'disable-theme custom-enabled-themes)
+        ;; 换成适合终端 256 色的主题，例如 doom-vibrant 或 tty-optimized
+        (load-theme 'blue-mood t)))))
+
+;; 确保在新建 Frame（包括使用 emacsclient）时自动切换主题
+(add-hook 'after-make-frame-functions #'my-apply-theme)
+
+;; 确保在 Emacs 刚启动（非 daemon 模式直接启动）时也能正确应用
+(my-apply-theme (selected-frame))
+
+(with-eval-after-load 'custom
+  (custom-set-faces
+   ;; 自定义选择区域的背景色和字体颜色
+   ;; '(region ((t (:background "#FF69B4"))))
+   ;; 窗口的状态栏
+   '(mode-line ((t (:background "#FF69B4"          ; 背景色：粉色
+                                :foreground "#FFFFFF"          ; 字体色：白色
+                                :box (:line-width 1 :color "#FF69B4") ; 边框：制造一点立体感或间距
+                                :weight bold))))               ; 字体粗细
+   
+   ;; 未激活（后台）窗口的状态栏
+   '(mode-line-inactive ((t (:background "#36524d" ; 背景色：暗灰色
+                            :foreground "#A0A0A0" ; 字体色：浅灰色
+                            :box (:line-width 1 :color "#4A4A4A")
+                            :weight normal))))
+   ))
+
+(set-scroll-bar-mode nil)
 ;;取消滚动栏
 
 ;;(customize-set-variable 'scroll-bar-mode 'right))
 ;;设置滚动栏在窗口右侧，而默认是在左侧
 
-;;(tool-bar-mode nil)
+(tool-bar-mode -1)
 ;;取消工具栏
+
+(menu-bar-mode -1)
+;;取消菜单
 
 ;;启动设置
 ;;(setq default-frame-alist
@@ -29,7 +75,9 @@
 ;;               (left-fringe)))
 
 ;;启动自动最大化(数据自己调整，注意格式，如(top . 0)，圆点前后都要留有空格)
-(setq initial-frame-alist '((top . 0) (left . 0) (width . 142) (height . 49)))
+(setq default-frame-alist '((vertical-scroll-bars) (fullscreen . maximized)))
+;; 如果你需要“全屏/无边框”（类似看电影的完全置顶全屏），可以改用下面这行：
+;; (add-to-list 'default-frame-alist '(fullscreen . fullboth))
 
 
 ;; 设置另外一些颜色：语法高亮显示的背景和主题，区域选择的背景和主题，二次选择的背景和选择

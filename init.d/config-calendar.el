@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;设置日历
 (require 'calfw)
 (require 'calfw-cal)
@@ -9,38 +10,72 @@
 
 (defcustom my-diary-root "/Volumes/Diary" "root directory or diary archive")
 (defcustom my-diary-skel-string
-"<div class=\"weather\">天气：晴</div>\n\
+"<div class=\"weather\">天气：%s</div>\n\
 <div class=\"date\">%04d.%02d.%02d %s</div>\n\
 ------------------------------------------------\n\
 \n\
-## 1. 综述\n\
+## 1. 笔记&思考\n\
   * 无\n\
 \n\
-## 2. 笔记&思考\n\
-  * 无\n\
-\n\
-## 3. 日常新闻\n\
+## 2. 日常新闻\n\
 \n\
 ### 1. 生词表\n\
 \n\
-| 生词 | 含义 | 词性 | 例句 | \n\
-|:-----|:-----|:-----|:-----| \n\
-|      |      |      |      | \n\
+| 生词 | 含义 | 读音 |词性 | 例句 | \n\
+|:-----|:-----|:-----|:----|:-----| \n\
+|      |      |      |     |      | \n\
 \n\
 ### 2. WSJ\n\
 \n\
 ### 3. BBC\n\
 \n\
 ### 4. Bloomberg\n\
-\n\
-### 5. Reuters\n\
-\n\
-### 6. The Economist\n\
-\n"
-
+"
 "skel content in newly created diary")
 
 (define-error 'prepare-archive-error "can not prepare diary archive")
+
+
+(defun my-diary-vocabulary-table ()
+  "查找当前文档中所有被**包裹的生词，去重后以 Markdown 表格形式插入到当前光标位置。"
+  (interactive)
+  (let ((vocab-list '())
+        (seen-table (make-hash-table :test 'equal))
+        table-string)
+    
+    ;; 1. 遍历整个文档查找 **xx** 格式的单词
+    (save-excursion
+      (goto-char (point-min))
+      ;; 正则表达式解释：\\*\\* 匹配左边的 **
+      ;; \\([^*]+\\) 捕获组1：匹配不包含 * 的任意字符（即单词本身）
+      ;; \\*\\* 匹配右边的 **
+      (while (re-search-forward "\\*\\*\\([^*]+\\)\\*\\*" nil t)
+        (let ((word (string-trim (match-string-no-properties 1))))
+          ;; 2. 自动去重：如果哈希表中没有该单词，且单词不为空，则加入列表
+          (when (and (not (string-empty-p word))
+                     (not (gethash word seen-table)))
+            (puthash word t seen-table)
+            (push word vocab-list)))))
+    
+    ;; 3. 如果找到了生词，构建 Markdown 表格字符串
+    (if vocab-list
+        (progn
+          ;; 将列表反转，以保持单词在文档中出现的先后顺序
+          (setq vocab-list (nreverse vocab-list))
+          
+          ;; 构建表头和对齐线
+          (setq table-string "| 生词 | 含义 | 读音 | 词性 | 例句 |\n|:-----|:-----|:-----|:----|:-----|\n")
+          
+          ;; 遍历单词列表，生成表格行
+          (dolist (word vocab-list)
+            (setq table-string (concat table-string (format "| %s |  |  |  |  |\n" word))))
+          
+          ;; 4. 在当前光标位置插入生成的表格
+          (insert table-string)
+          (message "成功提取 %d 个生词并生成表格！" (length vocab-list)))
+      
+      ;; 如果没找到，给出提示
+      (message "未在文档中找到被 ** 包裹的生词。"))))
 
 
 (defun my-diary-create-empty-diary (file year mon day)
@@ -49,8 +84,8 @@
          '(display-buffer-pop-up-window)))
     (display-buffer (find-file file)))
   ;(switch-to-buffer-other-window (find-file file))
-  (insert (format my-diary-skel-string
-                  year mon day (calendar-day-name current-date nil)))
+  (insert (format my-diary-skel-string (get-city-weather-string "Beijing")
+                  year mon day (calendar-day-name (list mon day year) nil)))
   (save-buffer))
 
 (defun my-diary-prepare-archive (diary-root)

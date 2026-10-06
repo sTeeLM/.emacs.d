@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; File: mew-mbix-imap.el
 ;; Module:  IMAP协议支持
@@ -67,15 +68,15 @@
          (mbox-path (mew-expand-folder (mew-case-folder case "%")))
          (mbox-alist-file-path (file-name-concat mbox-path mew-mbox-imap-cache-file)))
     (condition-case err 
-        (if (or force-rebuild (not (file-exists-p  mbox-alist-file-path)))
+        (if (or force-rebuild (not (file-exists-p mbox-alist-file-path)))
             (progn 
               (setq mbox-list (mew-imap-folder-alist case))
               (dolist (mbox-list-slot mbox-list)
                 (let ((mbox (car mbox-list-slot)))
                   (when (mew-mbox-imap-filter-mbox mbox exclude-list)
                     (setq alist (append alist (list (cons mbox
-                                                          (vector index nil nil nil nil nil nil nil nil)))))
-                    (setq index (1+ index))))))
+                                                          (vector index nil nil nil nil nil nil nil nil))))))
+                    (setq index (1+ index)))))
           (progn
             (setq alist (mew-lisp-load mbox-alist-file-path))))
       (error (message "mew-mbox-imap-alist-load failed %s" (error-message-string err))))
@@ -127,7 +128,9 @@
              (new-mail (mew-mbox-imap-alist-mail-new msgid r-messages uidnext)))
         ;; 累加biff-cnt
         (setq biff-cnt (+ biff-cnt new-mail))
-        (when (and (mew-mbox-imap-filter-mbox mbox name-filter) (or (not (equal new-mail 0)) (and new-filter (equal 0 new-mail))))
+        (when (and (mew-mbox-imap-filter-mbox mbox name-filter)
+                   (or (or (not (equal new-mail 0)) (and new-filter (equal 0 new-mail)))
+                       (or (not (equal unseen 0)) (and new-filter (equal 0 unseen)))))
           (setq entries (append entries
                                 (list
                                  (list
@@ -137,8 +140,8 @@
                                    ;;"U"
                                    (if (mew-mbox-imap-alist-is-updating mbox plist) "*" "")
                                    ;; MBOX
-                                   (if (= new-mail 0)
-                                       (if (= 0 unseen)
+                                   (if (or (not new-mail) (= new-mail 0))
+                                       (if (or (not unseen) (= 0 unseen))
                                            mbox
                                          (propertize mbox 'face 'mew-mbox-unseen-mail-face))
                                      (propertize mbox 'face 'mew-mbox-new-mail-face))
@@ -431,7 +434,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
             (mew-mbox-imap-checker-set process "type" type)
             (process-send-string process (format "%s\n" passwd))))
       (if (not passwd)
-          (mew-mox-warn "mew-mbox: password is null, can not start process")
+          (mew-mbox-log-warn "mew-mbox: password is null, can not start process")
         (mew-mbox-log-warn "mew-mbox: %s is not excutable or exist, can not start process" proc-path)))
     (if process
         (progn
@@ -543,7 +546,7 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
   (mew-mbox-imap-get-pass buffer 'foreground)
   (let ((case (mew-mbox-buffer-get-property buffer 'case))
         (proto (mew-mbox-buffer-get-property buffer 'proto)))
-    (mew-mbox-buffer-set-property buffer 'mbox-alist (mew-mbox-imap-alist-load case nil))
+    (mew-mbox-buffer-set-property buffer 'mbox-alist (mew-mbox-imap-alist-load case nil mew-mbox-imap-exclude-list))
     (mew-mbox-buffer-set-property buffer
                                   'mutex (make-mutex (format "mutex-%s:%s" case proto)))
     (mew-mbox-buffer-set-property buffer
@@ -598,13 +601,12 @@ alist-old的mbox条目在alist-new中没有，则丢弃"
                      (mew-mbox-buffer-get-property buffer 'process-alist) name-filter new-filter)))
     entries))
 
-
 ;; 启动mew时会调用：mew-init-p ＝nil
 ;; Z 时会调用：mew-init-p ＝t  
 (defun mew-mbox-imap-status-update (buffer init)
   "Mew启动后会调用该函数，init为nil时，什么都不用做; init为t时\
 表示Mew重新从服务器读取了邮箱列表，我们需要更新元数据"
-  (mew-mbox-log-debug "mew-mbox-imap-status-update called with (%s)" init)
+  (mew-mbox-log-info "mew-mbox-imap-status-update called with (%s)" init)
   (when (and init buffer)
     (mew-mbox-log-info "rebuild mbox alist!")
     (let* ((case (mew-mbox-buffer-get-property buffer 'case))
