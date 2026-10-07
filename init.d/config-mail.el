@@ -184,7 +184,6 @@
 ;; (setq shr-use-colors nil)
 
 ;; (2) 使用w3m阅读html邮件
-(add-to-list 'load-path "~/.emacs.d/plugin.d/emacs-w3m/share/emacs/site-lisp/w3m")
 (require 'w3m-load)
 (require 'mew-w3m)
 
