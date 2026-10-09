@@ -63,6 +63,16 @@
 (setq mew-passwd-lifetime 100) ; 100天
 (setq mew-passwd-reset-timer t)
 
+;; 支持multi-part 邮件
+(setq mew-use-alternative t)
+
+;; 邮件大小限制，超过这个大小不自动分析
+;; 需要‘.’才正确显示
+(setq mew-file-max-size 1000000)
+
+;; 邮件头最大长度
+(setq mew-header-max-length 200)
+
 ;; 未读标记
 (setq mew-use-unread-mark t)
 ;; 在所有邮箱中打开未读标记

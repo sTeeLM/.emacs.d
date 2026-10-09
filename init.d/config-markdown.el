@@ -26,7 +26,7 @@
 ;; markdown-live-preview-window-lynx
 ;; markdown-live-preview-window-w3m
 ;; 注释掉使用默认eww
-; (setq markdown-live-preview-window-function 'markdown-live-preview-window-lynx)
+;; (setq markdown-live-preview-window-function 'markdown-live-preview-window-w3m)
 
 
 ;; 将一个文件copy到同级assets目录下，并插入markdown文档中

@@ -35,9 +35,9 @@
   (with-selected-frame frame
     (when (display-graphic-p frame) ; 确保只在图形界面（GUI）下设置，不影响终端（TUI）
       ;; 1. 设置英文字体及大小
-      (set-face-attribute 'default frame :font "Ubuntu Mono 16")
+      (set-face-attribute 'default frame :font "Ubuntu Mono 18")
 ;;       ;; 设置eww的字体
-      (set-face-attribute 'variable-pitch nil  :font "Ubuntu Mono 16"   ; 替换为你系统中安装的字体名和字号
+      (set-face-attribute 'variable-pitch nil  :font "Ubuntu Mono 18"   ; 替换为你系统中安装的字体名和字号
                           :weight 'normal)
 ;;       ;; 2. 设置中文字体
       (dolist (charset '(han symbol cjk-misc))
@@ -50,11 +50,11 @@
 (my-setup-fonts (selected-frame))
 
 ;; 1. 手动：设置英文字体及大小
-;;(set-face-attribute 'default nil :font "Ubuntu Mono 16")
+(set-face-attribute 'default nil :font "Ubuntu Mono 18")
 
 ;; 2. 手动：设置中文字体
-;;(dolist (charset '(han symbol cjk-misc))
-;;  (set-fontset-font t charset (font-spec :family "Maple Mono NF CN" :size 20)))
+(dolist (charset '(han symbol cjk-misc))
+  (set-fontset-font t charset (font-spec :family "Maple Mono NF CN" :size 20)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 浏览器默认用等宽字体，在EWW下F切换字体
