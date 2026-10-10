@@ -38,6 +38,14 @@
 
 (setq mew-mbox-biff-new-mail-sound-fun 'play-new-mail-sound)
 
+;;让mew执行之后打开mew-mbox提供的邮箱列表
+(defun mew-after-hook (x)
+  (message "Opening Mew Mail Box...")
+  (mew-mbox-open-buffer))
+
+(advice-add 'mew :after #'mew-after-hook)
+
+
 ;; Optional setup (Read Mail menu for Emacs 21):
 (if (boundp 'read-mail-command)
     (setq read-mail-command 'mew))
