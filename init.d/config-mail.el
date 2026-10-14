@@ -214,7 +214,6 @@
 (setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
 (define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
 
-
 ;;mew启动时不自动获取邮件
 (setq mew-auto-get nil)
 
