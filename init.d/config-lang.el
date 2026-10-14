@@ -124,7 +124,6 @@
 
 (add-hook 'server-after-make-frame-hook 'set-im-face-after-frame-creation)
 
-
 ;; 其他的魔法设置
 (setq rime-disable-predicates
       '(rime-predicate-after-alphabet-char-p    ; 1. 刚敲完一个英文字母，后面继续打字时保持英文

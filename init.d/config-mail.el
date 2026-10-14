@@ -38,6 +38,14 @@
 
 (setq mew-mbox-biff-new-mail-sound-fun 'play-new-mail-sound)
 
+;;让mew执行之后打开mew-mbox提供的邮箱列表
+(defun mew-after-hook (x)
+  (message "Opening Mew Mail Box...")
+  (mew-mbox-open-buffer))
+
+(advice-add 'mew :after #'mew-after-hook)
+
+
 ;; Optional setup (Read Mail menu for Emacs 21):
 (if (boundp 'read-mail-command)
     (setq read-mail-command 'mew))
@@ -62,6 +70,16 @@
 (setq mew-passwd-timer-unit (* 24 60)) ; 这个单位是分钟，1天
 (setq mew-passwd-lifetime 100) ; 100天
 (setq mew-passwd-reset-timer t)
+
+;; 支持multi-part 邮件
+(setq mew-use-alternative t)
+
+;; 邮件大小限制，超过这个大小不自动分析
+;; 需要‘.’才正确显示
+(setq mew-file-max-size 1000000)
+
+;; 邮件头最大长度
+(setq mew-header-max-length 200)
 
 ;; 未读标记
 (setq mew-use-unread-mark t)
@@ -184,7 +202,6 @@
 ;; (setq shr-use-colors nil)
 
 ;; (2) 使用w3m阅读html邮件
-(add-to-list 'load-path "~/.emacs.d/plugin.d/emacs-w3m/share/emacs/site-lisp/w3m")
 (require 'w3m-load)
 (require 'mew-w3m)
 
@@ -196,7 +213,6 @@
 (setq mew-prog-text/html 'mew-mime-text/html-w3m)
 (setq mew-prog-text/html-ext 'mew-mime-text/html-w3m)
 (define-key mew-summary-mode-map "T" 'mew-w3m-view-inline-image)
-
 
 ;;mew启动时不自动获取邮件
 (setq mew-auto-get nil)

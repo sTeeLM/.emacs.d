@@ -161,4 +161,10 @@
 ;; custom-file，不要把custom-set-variables胡乱写到我的配置文件里
 (setq custom-file "~/.emacs.d/custom-file.el")
 
+;; 加载site-lisp中的所有库
+(let ((default-directory (expand-file-name "~/.emacs.d/site-lisp/")))
+  (when (file-directory-p default-directory)
+    (add-to-list 'load-path default-directory)
+    (normal-top-level-add-subdirs-to-load-path)))
+
 (provide 'config-system)

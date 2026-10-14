@@ -34,17 +34,34 @@
    ;; 自定义选择区域的背景色和字体颜色
    ;; '(region ((t (:background "#FF69B4"))))
    ;; 窗口的状态栏
-   '(mode-line ((t (:background "#FF69B4"          ; 背景色：粉色
-                                :foreground "#FFFFFF"          ; 字体色：白色
-                                :box (:line-width 1 :color "#FF69B4") ; 边框：制造一点立体感或间距
-                                :weight bold))))               ; 字体粗细
+   '(mode-line ((t (
+                    :background "#FF69B4"          ; 背景色：粉色
+                    :foreground "#FFFFFF"          ; 字体色：白色
+                    :box (:line-width 1 :color "#4A4A4A") ; 边框：制造一点立体感或间距
+                    :weight bold))))               ; 字体粗细
    
    ;; 未激活（后台）窗口的状态栏
-   '(mode-line-inactive ((t (:background "#36524d" ; 背景色：暗灰色
-                            :foreground "#A0A0A0" ; 字体色：浅灰色
-                            :box (:line-width 1 :color "#4A4A4A")
-                            :weight normal))))
+   '(mode-line-inactive ((t (
+                    :background "#36524d" ; 背景色：暗灰色
+                    :foreground "#A0A0A0" ; 字体色：浅灰色
+                    :box (:line-width 1 :color "#4A4A4A")
+                    :weight normal))))
+
+   '(mode-line-buffer-id  ((t (:background "#DAA520"          ; 背景色：金黄
+                    :foreground "#000000"
+                    :box (:line-width 1 :color "#FF00FF")
+                    :weight bold))))
    ))
+
+;; 设置另外一些颜色：语法高亮显示的背景和主题，区域选择的背景和主题，二次选择的背景和选择
+;; (set-face-foreground 'highlight "white")
+;; (set-face-background 'highlight "blue")
+;; (set-face-foreground 'region "cyan")
+;; (set-face-background 'region "blue")
+;; (set-face-foreground 'secondary-selection "skyblue")
+;; (set-face-background 'secondary-selection "darkblue")
+;; (set-face-background 'mode-line "cyan")
+
 
 (set-scroll-bar-mode nil)
 ;;取消滚动栏
@@ -78,16 +95,6 @@
 (setq default-frame-alist '((vertical-scroll-bars) (fullscreen . maximized)))
 ;; 如果你需要“全屏/无边框”（类似看电影的完全置顶全屏），可以改用下面这行：
 ;; (add-to-list 'default-frame-alist '(fullscreen . fullboth))
-
-
-;; 设置另外一些颜色：语法高亮显示的背景和主题，区域选择的背景和主题，二次选择的背景和选择
-;; (set-face-foreground 'highlight "white")
-;; (set-face-background 'highlight "blue")
-;; (set-face-foreground 'region "cyan")
-;; (set-face-background 'region "blue")
-;; (set-face-foreground 'secondary-selection "skyblue")
-;; (set-face-background 'secondary-selection "darkblue")
-;; (set-face-background 'mode-line "cyan")
 
 (display-time-mode 1);;启用时间显示设置，在minibuffer上面的那个杠上
 (setq display-time-24hr-format t);;时间使用24小时制

@@ -1257,6 +1257,10 @@ being below or beside the main window.
 (defconst emacs-w3m-git-revision "584d5937"
   "Git revision string of this emacs-w3m.")
 
+
+(defconst emacs-w3m-git-revision "584d5937"
+  "Git revision string of this emacs-w3m.")
+
 (provide 'w3m-load)
 
 ;; Local Variables:

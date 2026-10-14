@@ -9,7 +9,7 @@
 ;; File: mew-mbox.el
 ;; Module:  主模块
 ;; Author:  sTeeLM <steelm@madcat.com>
-;; Created: 2025/060/29
+;; Created: 2025/06/29
 ;; 
 ;;; Code:
 
@@ -137,7 +137,7 @@
   (setq mew-mbox-biff-saved-mail-cnt n)
   (if (= n 0)
       (setq mew-mbox-biff-string nil)
-    (setq mew-mbox-biff-string (format "📧 New Mail[%d] " n))))
+    (setq mew-mbox-biff-string (format "Mail[%d] " n))))
 
 (defun mew-mbox-biff-setup ()
   "初始化biff功能"
@@ -380,6 +380,7 @@
          (mbox (cadr id))
          proto)
     (when mbox
+      (message "Will update mbox %s" mbox)
       (setq proto (mew-mbox-fld-proto-symbol mbox))
       (mew-mbox-proto-call
        proto 'update-mbox (current-buffer) mbox))))
